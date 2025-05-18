@@ -30,6 +30,9 @@ interface Collection {
 type TelemetryCategory = "checkpoints" | "browser"
 
 class PostHogClient {
+	/* on-premises fallback - telemetry disabled */
+	private isOnPremises = true
+
 	// Map to control specific telemetry categories (event types)
 	private telemetryCategoryEnabled: Map<TelemetryCategory, boolean> = new Map([
 		["checkpoints", false], // Checkpoints telemetry disabled
@@ -171,6 +174,11 @@ class PostHogClient {
 	 * @param collect If true, store the event in collectedEvents instead of sending to PostHog
 	 */
 	public capture(event: { event: string; properties?: any }, collect: boolean = false): void {
+		/* on-premises fallback - telemetry disabled */
+		if (this.isOnPremises) {
+			return
+		}
+		
 		const taskId = event.properties.taskId
 		const propertiesWithVersion = {
 			...event.properties,

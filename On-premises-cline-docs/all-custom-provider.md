@@ -1,11 +1,11 @@
-# All-Custom (Json) Provider 상세 구성
+# All-Custom Provider 상세 구성
 
-All-Custom Provider는 가장 유연한 설정이 가능한 Provider로, 다양한 내부망 LLM 서비스와 통합할 수 있습니다.
+All-Custom Provider는 내부망 LLM 서비스와 통합할 수 있는 유연한 Provider로, OpenAI Compatible 방식과 유사하게 Add Header 기능을 제공합니다.
 
 ## 특징
 
 - **완전 사용자 정의 가능**: 헤더, 엔드포인트, 인증 방식 모두 설정 가능
-- **JSON 기반 헤더 설정**: 복잡한 헤더 구조도 JSON으로 간단히 정의
+- **Add Header 방식**: 버튼을 통해 커스텀 헤더를 동적으로 추가
 - **OpenAI API 호환**: 기본 형식은 OpenAI와 호환
 - **자동 서비스 감지**: OpenRouter 등 특정 서비스 자동 최적화
 
@@ -25,21 +25,27 @@ if (apiKey) {
 
 // 사용자 정의 헤더 병합
 if (customHeaders) {
-  const parsedHeaders = JSON.parse(customHeaders);
-  Object.assign(headers, parsedHeaders);
+  Object.assign(headers, customHeaders);
 }
 ```
+
+## UI에서 Add Header 사용
+
+Add Header 버튼을 클릭하여 동적으로 헤더를 추가할 수 있습니다:
+
+1. Custom Headers 섹션의 "Add Header" 버튼을 클릭
+2. 헤더 이름과 값을 입력
+3. 필요한 만큼 헤더를 추가
+4. 각 헤더는 개별적으로 삭제 가능
 
 ## 사용자 정의 헤더 예시
 
-```json
-{
-  "X-API-Key": "custom-api-key",
-  "X-Department": "Engineering",
-  "X-Project": "Internal-LLM",
-  "X-Auth-Method": "custom-auth"
-}
-```
+Add Header 버튼으로 다음과 같은 헤더들을 추가할 수 있습니다:
+
+- `X-API-Key`: custom-api-key
+- `X-Department`: Engineering
+- `X-Project`: Internal-LLM
+- `X-Auth-Method`: custom-auth
 
 ## 요청 본문 구성
 
@@ -69,7 +75,7 @@ class AllCustomProvider extends BaseProvider {
   constructor(options: AllCustomOptions) {
     super(options);
     this.endpoint = options.endpoint;
-    this.customHeaders = this.parseHeaders(options.customHeaders);
+    this.customHeaders = options.customHeaders || {};
     
     if (!this.endpoint) {
       throw new Error('Endpoint is required for All-Custom provider');
@@ -87,16 +93,6 @@ class AllCustomProvider extends BaseProvider {
     });
     
     return this.handleStreamResponse(response);
-  }
-  
-  private parseHeaders(headersJson?: string): Record<string, string> {
-    if (!headersJson) return {};
-    
-    try {
-      return JSON.parse(headersJson);
-    } catch (e) {
-      throw new Error(`Invalid JSON for custom headers: ${e.message}`);
-    }
   }
   
   private buildHeaders(): Record<string, string> {
@@ -147,40 +143,30 @@ class AllCustomProvider extends BaseProvider {
 
 ## 설정 예시
 
-### 1. OpenAI 호환 서비스
+### 1. 기본 API 키만 사용
 
-```json
+```typescript
 {
   "llmProvider": "all-custom",
   "customApiKey": "your-api-key",
   "customEndpoint": "https://internal-llm.company.com/v1/chat/completions",
   "customModel": "internal-gpt-4",
-  "customHeaders": "{}"
+  "customHeaders": {}
 }
 ```
 
-### 2. 커스텀 인증 서비스
+### 2. 커스텀 헤더가 필요한 경우
 
-```json
-{
-  "llmProvider": "all-custom",
-  "customEndpoint": "https://llm.internal/api/generate",
-  "customModel": "custom-model",
-  "customHeaders": "{\"X-API-Key\": \"secret-key\", \"X-User-ID\": \"john.doe\"}"
-}
-```
+UI에서 Add Header 버튼을 사용하여 다음 헤더들을 추가:
+- `X-API-Key`: secret-key
+- `X-User-ID`: john.doe
 
-### 3. 복잡한 헤더 구조
+### 3. 복잡한 인증이 필요한 경우
 
-```json
-{
-  "llmProvider": "all-custom",
-  "customApiKey": "bearer-token",
-  "customEndpoint": "https://ml-platform.corp/v2/inference",
-  "customModel": "corp-llm-v2",
-  "customHeaders": "{\"X-Tenant-ID\": \"tenant-123\", \"X-Resource-Pool\": \"gpu-cluster-1\", \"X-Priority\": \"high\"}"
-}
-```
+UI에서 Add Header 버튼을 사용하여 다음 헤더들을 추가:
+- `X-Tenant-ID`: tenant-123
+- `X-Resource-Pool`: gpu-cluster-1
+- `X-Priority`: high
 
 ## 에러 처리
 
@@ -188,9 +174,7 @@ class AllCustomProvider extends BaseProvider {
 try {
   const response = await custom.createCompletion(messages, systemPrompt);
 } catch (error) {
-  if (error.message.includes('Invalid JSON')) {
-    throw new Error('Custom headers must be valid JSON');
-  } else if (error.status === 401) {
+  if (error.status === 401) {
     throw new Error('Authentication failed - check API key and headers');
   } else if (error.status === 404) {
     throw new Error('Invalid endpoint URL');
@@ -307,7 +291,7 @@ private validateResponse(response: any) {
 
 ## 보안 고려사항
 
-1. **헤더 검증**: JSON 파싱 전 검증
+1. **헤더 검증**: 사용자 입력 헤더 검증
 2. **엔드포인트 화이트리스트**: 허용된 내부망 URL만 사용
 3. **민감 정보 보호**: 로그에 API 키 노출 방지
 4. **SSL 검증**: 내부 인증서 처리

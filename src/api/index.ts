@@ -23,6 +23,9 @@ import { FireworksHandler } from "./providers/fireworks"
 import { AskSageHandler } from "./providers/asksage"
 import { XAIHandler } from "./providers/xai"
 import { SambanovaHandler } from "./providers/sambanova"
+import { AllCustomHandler } from "./providers/all-custom"
+import { NapoliHandler } from "./providers/napoli"
+import { DortmundHandler } from "./providers/dortmund"
 
 export interface ApiHandler {
 	createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream
@@ -81,6 +84,12 @@ export function buildApiHandler(configuration: ApiConfiguration): ApiHandler {
 			return new XAIHandler(options)
 		case "sambanova":
 			return new SambanovaHandler(options)
+		case "all-custom":
+			return new AllCustomHandler(options)
+		case "napoli":
+			return new NapoliHandler(options)
+		case "dortmund":
+			return new DortmundHandler(options)
 		default:
 			return new AnthropicHandler(options)
 	}

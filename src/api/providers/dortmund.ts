@@ -40,7 +40,7 @@ export class DortmundHandler implements ApiHandler {
 			"X-Dep-Ticket": this.options.dortmundApiKey || "",
 			"User-Id": this.userId,
 			"User-Type": this.userType,
-			"Send-System-Name": "M",
+			"Send-System-Name": this.options.dortmundSystemName || "M",
 			"Prompt-Msg-Id": this.generateUUID(),
 			"Completion-Msg-Id": this.generateUUID(),
 			"Content-Type": "application/json",

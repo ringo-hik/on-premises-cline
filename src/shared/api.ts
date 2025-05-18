@@ -107,6 +107,7 @@ export interface ApiHandlerOptions {
 	dortmundUserType?: string
 	dortmundBaseUrl?: string
 	dortmundModelId?: string
+	dortmundSystemName?: string
 }
 
 export type ApiConfiguration = ApiHandlerOptions & {

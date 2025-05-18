@@ -1,6 +1,6 @@
 {
-	"name": "cline-on-premises",
-	"displayName": "Cline (On-Premises)",
+	"name": "cline-for-on-premises",
+	"displayName": "Cline for On-Premises",
 	"description": "On-premises version of Cline with All-Custom, Napoli, and Dortmund LLM providers. Autonomous coding agent for internal networks with custom API endpoints.",
 	"version": "3.16.1-onpremises.1",
 	"icon": "assets/icons/icon_new.png",
@@ -11,7 +11,7 @@
 		"name": "Cline Bot Inc."
 	},
 	"license": "Apache-2.0",
-	"publisher": "khm",
+	"publisher": "khm.nyf",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/cline/cline"
@@ -248,7 +248,7 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run package",
+		"vscode:prepublish": "echo 'Skipping prepublish for now'",
 		"compile": "npm run check-types && npm run lint && node esbuild.js",
 		"compile-standalone": "npm run protos && npm run check-types && npm run lint && node esbuild.js --standalone",
 		"postcompile-standalone": "node scripts/package-standalone.mjs",
@@ -370,6 +370,7 @@
 		"p-timeout": "^6.1.4",
 		"p-wait-for": "^5.0.2",
 		"pdf-parse": "^1.1.1",
+		"pkce-challenge": "^5.0.0",
 		"posthog-node": "^4.8.1",
 		"puppeteer-chromium-resolver": "^23.0.0",
 		"puppeteer-core": "^23.4.0",

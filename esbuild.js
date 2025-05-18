@@ -138,7 +138,7 @@ const baseConfig = {
 			name: "alias-plugin",
 			setup(build) {
 				build.onResolve({ filter: /^pkce-challenge$/ }, (args) => {
-					return { path: require.resolve("pkce-challenge/dist/index.browser.js") }
+					return { path: require.resolve("pkce-challenge") }
 				})
 			},
 		},

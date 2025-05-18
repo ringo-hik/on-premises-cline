@@ -14,6 +14,12 @@ echo "2️⃣ 의존성 확인 중..."
 if [ ! -d "node_modules" ]; then
     echo "   의존성 설치가 필요합니다..."
     npm install
+else
+    # pkce-challenge 패키지 업데이트 확인
+    if ! npm list pkce-challenge | grep -q "pkce-challenge@5.0.0"; then
+        echo "   pkce-challenge 패키지 업데이트 중..."
+        npm install pkce-challenge@latest --save
+    fi
 fi
 if [ ! -d "webview-ui/node_modules" ]; then
     echo "   Webview 의존성 설치가 필요합니다..."
@@ -25,6 +31,13 @@ echo ""
 echo "3️⃣ Webview 빌드 중..."
 cd webview-ui
 npx vite build || true
+
+# 경로 수정 - 빌드 후 HTML 파일 수정
+if [ -f "build/index.html" ]; then
+  # 절대 경로를 상대 경로로 변경
+  sed -i 's|src="/assets/|src="./assets/|g' build/index.html
+  sed -i 's|href="/assets/|href="./assets/|g' build/index.html
+fi
 cd ..
 
 # 4. 확장 프로그램 빌드
@@ -40,10 +53,23 @@ echo "5️⃣ VSIX 패키지 생성 중..."
 mkdir -p vsix-temp/extension
 cp -r README.md LICENSE package.json ./vsix-temp/extension/
 cp -r assets ./vsix-temp/extension/
+
+# dist 폴더 복사
 mkdir -p ./vsix-temp/extension/dist
 cp -r dist/* ./vsix-temp/extension/dist/ 2>/dev/null || true
-mkdir -p ./vsix-temp/extension/webview-ui-build
-cp -r webview-ui/build/* ./vsix-temp/extension/webview-ui-build/
+
+# webview 빌드 폴더 복사 (중요: webview-ui-build가 아닌 webview-ui/build로 복사)
+mkdir -p ./vsix-temp/extension/webview-ui/build
+cp -r webview-ui/build/* ./vsix-temp/extension/webview-ui/build/
+
+# 필요한 CSS 파일 복사
+mkdir -p ./vsix-temp/extension/node_modules/@vscode/codicons/dist
+cp -r node_modules/@vscode/codicons/dist/codicon.css ./vsix-temp/extension/node_modules/@vscode/codicons/dist/
+cp -r node_modules/@vscode/codicons/dist/codicon.ttf ./vsix-temp/extension/node_modules/@vscode/codicons/dist/
+
+mkdir -p ./vsix-temp/extension/webview-ui/node_modules/katex/dist
+cp -r webview-ui/node_modules/katex/dist/katex.min.css ./vsix-temp/extension/webview-ui/node_modules/katex/dist/
+cp -r webview-ui/node_modules/katex/dist/fonts ./vsix-temp/extension/webview-ui/node_modules/katex/dist/
 
 # Content Types 파일 생성
 cat > ./vsix-temp/\[Content_Types\].xml << 'EOF'
@@ -69,8 +95,8 @@ cat > ./vsix-temp/extension.vsixmanifest << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vscode-manifest-schema/2011">
   <Metadata>
-    <Identity Language="en-US" Id="claude-dev" Version="3.16.1" Publisher="cline-onpremises"/>
-    <DisplayName>Cline (On-premises)</DisplayName>
+    <Identity Language="en-US" Id="cline-for-on-premises" Version="3.16.1-onpremises.1" Publisher="khm.nyf"/>
+    <DisplayName>Cline for On-Premises</DisplayName>
     <Description>On-premises version of Cline</Description>
     <Categories>Other</Categories>
     <Properties>

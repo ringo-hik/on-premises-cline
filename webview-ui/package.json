@@ -49,7 +49,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.17.0",
-		"@tailwindcss/vite": "^4.1.4",
+		"@tailwindcss/vite": "^4.0.0-alpha.66",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.2.0",
 		"@testing-library/user-event": "^14.6.1",
@@ -69,7 +69,7 @@
 		"globals": "^15.14.0",
 		"jsdom": "^26.0.0",
 		"react-devtools": "^6.1.2",
-		"tailwindcss": "^4.1.5",
+		"tailwindcss": "^4.0.0-alpha.66",
 		"typescript": "^5.7.3",
 		"typescript-eslint": "^8.18.2",
 		"vite": "^6.3.4",

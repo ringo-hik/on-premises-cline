@@ -327,6 +327,9 @@ const ApiOptions = ({
 					<VSCodeOption value="asksage">AskSage</VSCodeOption>
 					<VSCodeOption value="xai">xAI</VSCodeOption>
 					<VSCodeOption value="sambanova">SambaNova</VSCodeOption>
+					<VSCodeOption value="all-custom">All-Custom</VSCodeOption>
+					<VSCodeOption value="napoli">Napoli</VSCodeOption>
+					<VSCodeOption value="dortmund">Dortmund</VSCodeOption>
 				</VSCodeDropdown>
 			</DropdownContainer>
 

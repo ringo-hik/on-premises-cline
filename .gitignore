@@ -20,3 +20,9 @@ coverage
 !.github/scripts/coverage/
 
 *evals.env
+
+# Ignore sensitive instruction files
+지시문.txt
+*지시문*
+instructions.txt
+*instructions*

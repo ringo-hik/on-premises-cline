@@ -543,20 +543,20 @@ export async function updateApiConfiguration(context: vscode.ExtensionContext, a
 	await storeSecret(context, "dortmundApiKey", apiConfiguration.dortmundApiKey)
 	await updateGlobalState(context, "favoritedModelIds", favoritedModelIds)
 	await updateGlobalState(context, "requestTimeoutMs", apiConfiguration.requestTimeoutMs)
-	
+
 	// All-Custom provider settings
 	await storeSecret(context, "allCustomApiKey", apiConfiguration.allCustomApiKey)
 	await updateGlobalState(context, "allCustomEndpoint", apiConfiguration.allCustomEndpoint)
 	await updateGlobalState(context, "allCustomModelId", apiConfiguration.allCustomModelId)
 	await updateGlobalState(context, "allCustomHeaders", apiConfiguration.allCustomHeaders)
 	await updateGlobalState(context, "allCustomModelInfo", apiConfiguration.allCustomModelInfo)
-	
+
 	// Napoli provider settings
 	await storeSecret(context, "napoliApiKey", apiConfiguration.napoliApiKey)
 	await updateGlobalState(context, "napoliBaseUrl", apiConfiguration.napoliBaseUrl)
 	await updateGlobalState(context, "napoliModelId", apiConfiguration.napoliModelId)
 	await updateGlobalState(context, "napoliModelInfo", apiConfiguration.napoliModelInfo)
-	
+
 	// Dortmund provider settings
 	await storeSecret(context, "dortmundApiKey", apiConfiguration.dortmundApiKey)
 	await updateGlobalState(context, "dortmundBaseUrl", apiConfiguration.dortmundBaseUrl)

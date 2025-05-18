@@ -46,7 +46,11 @@ export class NapoliHandler implements ApiHandler {
 		yield* this.handleStreamResponse(response, messageInput, systemPrompt)
 	}
 
-	private async *handleStreamResponse(response: Response, messagesInput: Anthropic.Messages.MessageParam[], systemPromptInput: string): ApiStream {
+	private async *handleStreamResponse(
+		response: Response,
+		messagesInput: Anthropic.Messages.MessageParam[],
+		systemPromptInput: string,
+	): ApiStream {
 		const reader = response.body?.getReader()
 		const decoder = new TextDecoder()
 

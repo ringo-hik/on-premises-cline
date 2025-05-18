@@ -92,6 +92,21 @@ export interface ApiHandlerOptions {
 	sambanovaApiKey?: string
 	requestTimeoutMs?: number
 	onRetryAttempt?: (attempt: number, maxRetries: number, delay: number, error: any) => void
+	// all-custom
+	allCustomApiKey?: string
+	allCustomEndpoint?: string
+	allCustomModelId?: string
+	allCustomHeaders?: Record<string, string>
+	// napoli
+	napoliApiKey?: string
+	napoliBaseUrl?: string
+	napoliModelId?: string
+	// dortmund
+	dortmundApiKey?: string
+	dortmundUserId?: string
+	dortmundUserType?: string
+	dortmundBaseUrl?: string
+	dortmundModelId?: string
 }
 
 export type ApiConfiguration = ApiHandlerOptions & {
@@ -1762,4 +1777,43 @@ export const requestyDefaultModelInfo: ModelInfo = {
 	cacheWritesPrice: 3.75,
 	cacheReadsPrice: 0.3,
 	description: "Anthropic's most intelligent model. Highest level of intelligence and capability.",
+}
+
+// All-Custom
+export type AllCustomModelId = string
+export const allCustomDefaultModelId = "gpt-4o"
+export const allCustomDefaultModelInfo: ModelInfo = {
+	maxTokens: 8192,
+	contextWindow: 128_000,
+	supportsImages: true,
+	supportsPromptCache: false,
+	inputPrice: 0,
+	outputPrice: 0,
+	description: "Custom LLM service with user-defined headers",
+}
+
+// Napoli
+export type NapoliModelId = string
+export const napoliDefaultModelId = "napoli-internal-model"
+export const napoliDefaultModelInfo: ModelInfo = {
+	maxTokens: 8192,
+	contextWindow: 128_000,
+	supportsImages: true,
+	supportsPromptCache: false,
+	inputPrice: 0,
+	outputPrice: 0,
+	description: "Internal LLM service with OpenAI API compatibility",
+}
+
+// Dortmund
+export type DortmundModelId = string
+export const dortmundDefaultModelId = "dortmund-internal-model"
+export const dortmundDefaultModelInfo: ModelInfo = {
+	maxTokens: 8192,
+	contextWindow: 128_000,
+	supportsImages: false,
+	supportsPromptCache: false,
+	inputPrice: 0,
+	outputPrice: 0,
+	description: "Internal LLM service with custom authentication headers",
 }

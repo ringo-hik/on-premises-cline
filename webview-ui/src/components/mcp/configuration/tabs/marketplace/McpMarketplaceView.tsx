@@ -31,7 +31,7 @@ const McpMarketplaceView = () => {
 			</div>
 		</div>
 	)
-	
+
 	// Original code disabled for on-premises
 	const { mcpServers } = useExtensionState()
 	const [items, setItems] = useState<McpMarketplaceItem[]>([])

@@ -27,7 +27,7 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 	/* on-premises fallback - firebase disabled */
 	const [user, setUser] = useState<User | null>(null)
 	const [isInitialized, setIsInitialized] = useState(true) // Set to true immediately for on-premises
-	
+
 	// Disabled for on-premises mode
 	// const app = initializeApp(firebaseConfig)
 	// const auth = getAuth(app)
@@ -39,14 +39,11 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 		// No auth state changes in on-premises mode
 	}, [])
 
-	const signInWithToken = useCallback(
-		async (token: string) => {
-			/* on-premises fallback - firebase disabled */
-			console.log("Firebase sign-in disabled in on-premises mode")
-			return Promise.resolve()
-		},
-		[],
-	)
+	const signInWithToken = useCallback(async (token: string) => {
+		/* on-premises fallback - firebase disabled */
+		console.log("Firebase sign-in disabled in on-premises mode")
+		return Promise.resolve()
+	}, [])
 
 	// Listen for auth callback from extension
 	useEffect(() => {

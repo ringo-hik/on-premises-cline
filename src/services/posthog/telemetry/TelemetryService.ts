@@ -178,7 +178,7 @@ class PostHogClient {
 		if (this.isOnPremises) {
 			return
 		}
-		
+
 		const taskId = event.properties.taskId
 		const propertiesWithVersion = {
 			...event.properties,

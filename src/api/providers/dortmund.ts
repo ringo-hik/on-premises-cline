@@ -7,10 +7,14 @@ import { ApiStream } from "../transform/stream"
 export class DortmundHandler implements ApiHandler {
 	private options: ApiHandlerOptions
 	private baseUrl: string
+	private userId: string
+	private userType: string
 
 	constructor(options: ApiHandlerOptions) {
 		this.options = options
 		this.baseUrl = this.options.dortmundBaseUrl || "http://dortmund-service/v1"
+		this.userId = this.options.dortmundUserId || ""
+		this.userType = this.options.dortmundUserType || ""
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
@@ -28,56 +32,14 @@ export class DortmundHandler implements ApiHandler {
 			throw new Error(`Dortmund API error: ${response.status} ${response.statusText}`)
 		}
 
-		const reader = response.body?.getReader()
-		const decoder = new TextDecoder()
-
-		while (true) {
-			const { done, value } = await reader!.read()
-			if (done) break
-
-			const chunk = decoder.decode(value)
-			const lines = chunk.split("\n")
-
-			for (const line of lines) {
-				if (line.startsWith("data: ")) {
-					const data = line.slice(6)
-					if (data === "[DONE]") continue
-
-					try {
-						const parsed = JSON.parse(data)
-						const content = parsed.choices?.[0]?.delta?.content || parsed.delta?.content
-						if (content) {
-							yield {
-								type: "text",
-								text: content,
-							}
-						}
-					} catch (e) {
-						console.error("Failed to parse SSE data:", e)
-					}
-				}
-			}
-		}
-
-		// Simple token estimation
-		const totalLength = messages.reduce((acc, msg) => {
-			const content = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content)
-			return acc + content.length
-		}, systemPrompt.length)
-
-		yield {
-			type: "usage",
-			inputTokens: Math.ceil(totalLength / 4),
-			outputTokens: 0,
-			totalCost: 0,
-		}
+		yield* this.handleStreamResponse(response)
 	}
 
 	private buildHeaders(): Record<string, string> {
 		return {
 			"X-Dep-Ticket": this.options.dortmundApiKey || "",
-			"User-Id": this.options.dortmundUserId || "",
-			"User-Type": this.options.dortmundUserType || "",
+			"User-Id": this.userId,
+			"User-Type": this.userType,
 			"Send-System-Name": "M",
 			"Prompt-Msg-Id": this.generateUUID(),
 			"Completion-Msg-Id": this.generateUUID(),
@@ -90,16 +52,20 @@ export class DortmundHandler implements ApiHandler {
 		return {
 			model_id: modelId,
 			system_prompt: systemPrompt,
-			messages: messages.map((msg) => ({
-				role: msg.role,
-				content: this.extractTextContent(msg.content),
-			})),
-			user_id: this.options.dortmundUserId || "",
-			user_type: this.options.dortmundUserType || "",
+			messages: this.formatMessages(messages),
+			user_id: this.userId,
+			user_type: this.userType,
 			temperature: 0,
 			max_tokens: 4096,
 			stream_mode: true,
 		}
+	}
+
+	private formatMessages(messages: Anthropic.Messages.MessageParam[]) {
+		return messages.map((msg) => ({
+			role: msg.role,
+			content: this.extractTextContent(msg.content),
+		}))
 	}
 
 	private extractTextContent(content: Anthropic.Messages.MessageParam["content"]): string {
@@ -123,6 +89,57 @@ export class DortmundHandler implements ApiHandler {
 			const v = c === "x" ? r : (r & 0x3) | 0x8
 			return v.toString(16)
 		})
+	}
+
+	private async *handleStreamResponse(response: Response): ApiStream {
+		const reader = response.body?.getReader()
+		const decoder = new TextDecoder()
+
+		while (true) {
+			const { done, value } = await reader!.read()
+			if (done) {
+				break
+			}
+
+			const chunk = decoder.decode(value)
+			const lines = chunk.split("\n")
+
+			for (const line of lines) {
+				if (line.startsWith("data: ")) {
+					const data = line.slice(6)
+					if (data === "[DONE]") {
+						continue
+					}
+
+					try {
+						const parsed = JSON.parse(data)
+						// Dortmund의 커스텀 응답 형식 처리
+						const content = parsed.choices?.[0]?.delta?.content || parsed.delta?.content
+						if (content) {
+							yield {
+								type: "text",
+								text: content,
+							}
+						}
+					} catch (e) {
+						console.error("Failed to parse SSE data:", e)
+					}
+				}
+			}
+		}
+
+		// 토큰 사용량 추정
+		const totalLength = messages.reduce((acc, msg) => {
+			const content = this.extractTextContent(msg.content)
+			return acc + content.length
+		}, systemPrompt.length)
+
+		yield {
+			type: "usage",
+			inputTokens: Math.ceil(totalLength / 4),
+			outputTokens: 0,
+			totalCost: 0,
+		}
 	}
 
 	getModel(): { id: DortmundModelId; info: ModelInfo } {

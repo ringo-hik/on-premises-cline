@@ -40,7 +40,7 @@ export const ClineAccountView = () => {
 			</div>
 		</div>
 	)
-	
+
 	// Original code disabled for on-premises
 	const { user: firebaseUser, handleSignOut } = useFirebaseAuth()
 	const { userInfo, apiConfiguration } = useExtensionState()

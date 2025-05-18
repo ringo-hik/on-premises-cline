@@ -52,6 +52,12 @@ import {
 	doubaoModels,
 	doubaoDefaultModelId,
 	liteLlmModelInfoSaneDefaults,
+	allCustomDefaultModelId,
+	allCustomDefaultModelInfo,
+	napoliDefaultModelId,
+	napoliDefaultModelInfo,
+	dortmundDefaultModelId,
+	dortmundDefaultModelInfo,
 } from "@shared/api"
 import { ExtensionMessage } from "@shared/ExtensionMessage"
 import { useExtensionState } from "@/context/ExtensionStateContext"
@@ -1958,6 +1964,205 @@ const ApiOptions = ({
 				</div>
 			)}
 
+			{selectedProvider === "all-custom" && (
+				<div>
+					<VSCodeTextField
+						value={apiConfiguration?.allCustomEndpoint || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						type="url"
+						onInput={handleInputChange("allCustomEndpoint")}
+						placeholder={"Enter endpoint URL..."}>
+						<span style={{ fontWeight: 500 }}>Endpoint URL</span>
+					</VSCodeTextField>
+					<VSCodeTextField
+						value={apiConfiguration?.allCustomApiKey || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						type="password"
+						onInput={handleInputChange("allCustomApiKey")}
+						placeholder="Enter API Key...">
+						<span style={{ fontWeight: 500 }}>API Key</span>
+					</VSCodeTextField>
+					<VSCodeTextField
+						value={apiConfiguration?.allCustomModelId || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						onInput={handleInputChange("allCustomModelId")}
+						placeholder={"Enter Model ID..."}>
+						<span style={{ fontWeight: 500 }}>Model ID</span>
+					</VSCodeTextField>
+
+					{/* All-Custom Headers */}
+					{(() => {
+						const headerEntries = Object.entries(apiConfiguration?.allCustomHeaders ?? {})
+						return (
+							<div style={{ marginBottom: 10 }}>
+								<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+									<span style={{ fontWeight: 500 }}>Custom Headers</span>
+									<VSCodeButton
+										onClick={() => {
+											const currentHeaders = { ...(apiConfiguration?.allCustomHeaders || {}) }
+											const headerCount = Object.keys(currentHeaders).length
+											const newKey = `header${headerCount + 1}`
+											currentHeaders[newKey] = ""
+											handleInputChange("allCustomHeaders")({
+												target: {
+													value: currentHeaders,
+												},
+											})
+										}}>
+										Add Header
+									</VSCodeButton>
+								</div>
+								<div>
+									{headerEntries.map(([key, value], index) => (
+										<div key={index} style={{ display: "flex", gap: 5, marginTop: 5 }}>
+											<VSCodeTextField
+												value={key}
+												style={{ width: "40%" }}
+												placeholder="Header name"
+												onInput={(e: any) => {
+													const currentHeaders = apiConfiguration?.allCustomHeaders ?? {}
+													const newValue = e.target.value
+													if (newValue && newValue !== key) {
+														const { [key]: _, ...rest } = currentHeaders
+														handleInputChange("allCustomHeaders")({
+															target: {
+																value: {
+																	...rest,
+																	[newValue]: value,
+																},
+															},
+														})
+													}
+												}}>
+												<span style={{ fontWeight: 500 }}>Name</span>
+											</VSCodeTextField>
+											<VSCodeTextField
+												value={value}
+												style={{ width: "50%" }}
+												placeholder="Header value"
+												onInput={(e: any) => {
+													const currentHeaders = { ...(apiConfiguration?.allCustomHeaders || {}) }
+													currentHeaders[key] = e.target.value
+													handleInputChange("allCustomHeaders")({
+														target: { value: currentHeaders },
+													})
+												}}>
+												<span style={{ fontWeight: 500 }}>Value</span>
+											</VSCodeTextField>
+											<VSCodeButton
+												appearance="icon"
+												onClick={() => {
+													const currentHeaders = { ...(apiConfiguration?.allCustomHeaders || {}) }
+													delete currentHeaders[key]
+													handleInputChange("allCustomHeaders")({
+														target: { value: currentHeaders },
+													})
+												}}>
+												<span className="codicon codicon-trash" />
+											</VSCodeButton>
+										</div>
+									))}
+								</div>
+							</div>
+						)
+					})()}
+					<p
+						style={{
+							fontSize: "12px",
+							marginTop: 3,
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+						Configure your custom LLM service endpoint and headers for internal network LLM services.
+					</p>
+				</div>
+			)}
+
+			{selectedProvider === "napoli" && (
+				<div>
+					<VSCodeTextField
+						value={apiConfiguration?.napoliBaseUrl || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						type="url"
+						onInput={handleInputChange("napoliBaseUrl")}
+						placeholder={"Default: https://napoli-service/v1"}>
+						<span style={{ fontWeight: 500 }}>Base URL</span>
+					</VSCodeTextField>
+					<VSCodeTextField
+						value={apiConfiguration?.napoliApiKey || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						type="password"
+						onInput={handleInputChange("napoliApiKey")}
+						placeholder="Enter API Key...">
+						<span style={{ fontWeight: 500 }}>API Key</span>
+					</VSCodeTextField>
+					<VSCodeTextField
+						value={apiConfiguration?.napoliModelId || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						onInput={handleInputChange("napoliModelId")}
+						placeholder={"Default: napoli-internal-model"}>
+						<span style={{ fontWeight: 500 }}>Model ID</span>
+					</VSCodeTextField>
+					<p
+						style={{
+							fontSize: "12px",
+							marginTop: 3,
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+						Napoli is an OpenAI-compatible internal LLM service with Bearer token authentication.
+					</p>
+				</div>
+			)}
+
+			{selectedProvider === "dortmund" && (
+				<div>
+					<VSCodeTextField
+						value={apiConfiguration?.dortmundBaseUrl || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						type="url"
+						onInput={handleInputChange("dortmundBaseUrl")}
+						placeholder={"Default: http://dortmund-service/v1"}>
+						<span style={{ fontWeight: 500 }}>Base URL</span>
+					</VSCodeTextField>
+					<VSCodeTextField
+						value={apiConfiguration?.dortmundApiKey || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						type="password"
+						onInput={handleInputChange("dortmundApiKey")}
+						placeholder="Enter Dep-Ticket...">
+						<span style={{ fontWeight: 500 }}>Dep-Ticket</span>
+					</VSCodeTextField>
+					<VSCodeTextField
+						value={apiConfiguration?.dortmundUserId || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						onInput={handleInputChange("dortmundUserId")}
+						placeholder="Enter User ID...">
+						<span style={{ fontWeight: 500 }}>User ID</span>
+					</VSCodeTextField>
+					<VSCodeTextField
+						value={apiConfiguration?.dortmundUserType || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						onInput={handleInputChange("dortmundUserType")}
+						placeholder="Enter User Type...">
+						<span style={{ fontWeight: 500 }}>User Type</span>
+					</VSCodeTextField>
+					<VSCodeTextField
+						value={apiConfiguration?.dortmundModelId || ""}
+						style={{ width: "100%", marginBottom: 10 }}
+						onInput={handleInputChange("dortmundModelId")}
+						placeholder={"Default: dortmund-internal-model"}>
+						<span style={{ fontWeight: 500 }}>Model ID</span>
+					</VSCodeTextField>
+					<p
+						style={{
+							fontSize: "12px",
+							marginTop: 3,
+							color: "var(--vscode-descriptionForeground)",
+						}}>
+						Dortmund is an internal LLM service with custom header authentication (X-Dep-Ticket, User-ID, User-Type).
+					</p>
+				</div>
+			)}
+
 			{apiErrorMessage && (
 				<p
 					style={{
@@ -2493,6 +2698,24 @@ export function normalizeApiConfiguration(apiConfiguration?: ApiConfiguration): 
 			return getProviderData(xaiModels, xaiDefaultModelId)
 		case "sambanova":
 			return getProviderData(sambanovaModels, sambanovaDefaultModelId)
+		case "all-custom":
+			return {
+				selectedProvider: provider,
+				selectedModelId: apiConfiguration?.allCustomModelId || allCustomDefaultModelId,
+				selectedModelInfo: apiConfiguration?.allCustomModelInfo || allCustomDefaultModelInfo,
+			}
+		case "napoli":
+			return {
+				selectedProvider: provider,
+				selectedModelId: apiConfiguration?.napoliModelId || napoliDefaultModelId,
+				selectedModelInfo: apiConfiguration?.napoliModelInfo || napoliDefaultModelInfo,
+			}
+		case "dortmund":
+			return {
+				selectedProvider: provider,
+				selectedModelId: apiConfiguration?.dortmundModelId || dortmundDefaultModelId,
+				selectedModelInfo: apiConfiguration?.dortmundModelInfo || dortmundDefaultModelInfo,
+			}
 		default:
 			return getProviderData(anthropicModels, anthropicDefaultModelId)
 	}

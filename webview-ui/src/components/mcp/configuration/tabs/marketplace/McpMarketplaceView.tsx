@@ -14,6 +14,25 @@ import { vscode } from "@/utils/vscode"
 import McpMarketplaceCard from "./McpMarketplaceCard"
 import McpSubmitCard from "./McpSubmitCard"
 const McpMarketplaceView = () => {
+	/* on-premises fallback - marketplace disabled */
+	return (
+		<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				justifyContent: "center",
+				alignItems: "center",
+				height: "100%",
+				padding: "20px",
+				gap: "12px",
+			}}>
+			<div style={{ color: "var(--vscode-descriptionForeground)" }}>
+				MCP Marketplace is not available in on-premises mode
+			</div>
+		</div>
+	)
+	
+	// Original code disabled for on-premises
 	const { mcpServers } = useExtensionState()
 	const [items, setItems] = useState<McpMarketplaceItem[]>([])
 	const [isLoading, setIsLoading] = useState(true)

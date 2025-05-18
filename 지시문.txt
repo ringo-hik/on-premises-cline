@@ -1,0 +1,178 @@
+1. 나는 반드시 이 문서만을 통해서 너에게 명령을 하달하니 이 문서만 100% 신뢰하는 단일 진실 원천으로 삼도록 
+
+
+내가 전달하는 방식으로 Cline LLM서비스를 제외한  │
+│   외부망과의 통신을 하는것을 모두 방어하는         │
+│   코드로 수정할거야. 1, 유저시나리오 차단 외부망   │
+│   연동을 해야하는 버튼이 존재하면 버튼이 보이지    │
+│   않도록 WEBVIEW에서 삭제 2. 사용자                │
+│   시나리오적으로 외부망 웹 링크 접속이 가능한      │
+│   상황이면 해당 옵션 설정 삭제 (default가 Y라면    │
+│   N으로 변경) ex - Enable MCP Marketplace ->       │
+│   디스에이블 처리후 항상 N처리  3. 내부적으로      │
+│   동작하는 코드이면 해당 수행 되지 않도록 적절한   │
+│   FALLBACK 처리 (ex) postHog method 호출되면 항상  │
+│   True 리턴 또는 예상되는 적절한 내부망용          │
+│   fallback처리) 복잡하게 코드 삭제하고 지우는      │
+│   방식말고 이렇게 처리해줘 
+
+
+-- 수행항목 
+1. Firebase 인증 비활성화
+2. PostHog 텔레메트리 비활성화
+3. Cline 계정 서비스 비활성화
+4. 자동 업데이트 기능 비활성화
+5. MCP 서버 다운로드 비활성화
+
+6. 내부망 LLM 지원을 위한 3가지 추가 API Provider (Napoli, Dortmund, All-Custom (Json))
+다양한 인증 방식 지원 (Bearer, User-Id)
+
+
+2. 참고사항 
+
+  Dortmund과 Napoli의 헤더 및 바디 구성 방식 브리핑 (Drotmund와 Napoli는 각 프로바이더이면서 각각의 개별 model을 사용함)
+
+  1. Napoli 구성 방식
+
+  Headers:
+  // Napoli은 Bearer 토큰 인증 방식 사용
+  headers['Authorization'] = `Bearer ${apiKey}`
+  headers['Content-Type'] = 'application/json'
+  headers['Accept'] = 'text/event-stream; charset=utf-8'
+
+  Body (Request Payload):
+  {
+    model: 'Napoli-internal-model', // 기본값
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.map(msg => ({
+        role: msg.role,
+        content: '변환된 컨텐츠'
+      }))
+    ],
+    temperature: 0,
+    max_tokens: 4096,
+    stream: true
+  }
+
+  특징:
+  - OpenAI API 호환 형식
+  - Bearer 토큰으로 인증
+  - URL: https://Napoli-SERVICE/v1/chat/completions
+
+  2. Dortmund 구성 방식
+
+  Headers:
+  // Dortmund은 사용자 ID 및 타입 헤더 사용
+  headers['X-Dep-Ticket'] = 
+  headers['User-Id'] = '' // 기본값
+  headers['User-Type'] = '' // 기본값
+  headers['Send-System-Name'] = 'M' // 기본값
+  headers['Prompt-Msg-Id'] = generateUUID()
+  headers['Completion-Msg-Id'] = generateUUID()
+  headers['Content-Type'] = 'application/json'
+  headers['Accept'] = 'text/event-stream; charset=utf-8'
+
+  Body (Request Payload):
+  {
+    model_id: 'Dortmund-internal-model', // 기본값
+    system_prompt: systemPrompt,
+    messages: messages.map(msg => ({
+      role: msg.role,
+      content: '변환된 컨텐츠'
+    })),
+    user_id: '', // 기본값
+    user_type: '', // 기본값
+    temperature: 0,
+    max_tokens: 4096,
+    stream_mode: true
+  }
+
+  특징:
+  - 커스텀 형식 (model_id, system_prompt 등)
+  - X-Dep-Ticket 헤더로 인증
+  - User-Id, User-Type 필수
+  - UUID 생성하여 Prompt-Msg-Id, Completion-Msg-Id 설정
+  - URL: http://Dortmund-SERVICE/v1/chat/completions
+
+  3. 공통 사항
+
+  - 두 모델 모두 text/event-stream 형식으로 스트리밍 응답 처리
+  - 메시지 컨텐츠는 문자열이 아닌 경우 text 타입만 추출하여 결합
+  - 토큰 사용량은 estimateTokens 메서드로 대략적으로 추정
+  - 스트림 모드 기본 활성화
+
+  이렇게 두 프로바이더는 서로 다른 헤더 구성과 요청 바디 포맷을 사용하여 각자의 LLM 서비스와 통신합니다.
+
+3. ALL Custom (Json) 구성 방식
+
+  Headers:
+  // 기본 헤더 설정
+  headers['Content-Type'] = 'application/json'
+  headers['Accept'] = 'text/event-stream; charset=utf-8'
+
+  // Bearer 토큰 인증 방식 사용 (대부분의 API에서 필요)
+  if (apiKey) {
+    headers['Authorization'] = `Bearer ${apiKey}`
+  }
+
+  // 사용자 정의 헤더 병합
+  if (this.options.intranetCustomHeaders) {
+    const customHeaders = JSON.parse(this.options.intranetCustomHeaders)
+    Object.assign(headers, customHeaders)
+  }
+
+  Body (Request Payload):
+  {
+    model: 'custom-model', // 또는 사용자 지정 모델명
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.map(msg => ({
+        role: msg.role,
+        content: '변환된 컨텐츠'
+      }))
+    ],
+    temperature: 0,
+    max_tokens: 4096,
+    stream: true
+  }
+
+  // OpenRouter의 경우 추가 필드
+  if (endpoint.includes('openrouter.ai')) {
+    customPayload.http_referer = "https://vscode.dev"
+    customPayload.transforms = ["middle-out"]
+  }
+
+  특징:
+  - OpenAI API 호환 기본 형식
+  - Bearer 토큰 인증 (선택적)
+  - 사용자 정의 헤더 JSON을 파싱하여 병합 가능
+  - URL: 사용자가 직접 입력한 endpoint 사용
+  - OpenRouter 특별 처리 로직 포함
+
+  2. ALL Custom (Json) Provider 의 주요 특징
+
+  1. 유연한 인증 방식
+    - API Key가 있으면 Bearer 토큰으로 자동 설정
+    - 사용자 정의 헤더로 덮어쓰기 가능
+  2. 사용자 정의 헤더
+    - JSON 형식으로 입력받아 파싱
+    - 기본 헤더에 병합되어 적용
+    - 에러 처리: JSON 파싱 실패 시 예외 발생
+  3. 엔드포인트 설정
+    - 사용자가 직접 URL 입력
+    - 입력하지 않으면 에러 발생
+  4. 특별 케이스 처리
+    - OpenRouter 감지 시 추가 파라미터 자동 설정
+    - http_referer, transforms 필드 추가
+
+  3. 세 프로바이더의 비교 정리
+
+  4. Custom Model의 장점
+
+  1. 높은 유연성: 다양한 LLM API와 호환 가능
+  2. 사용자 정의 가능: 헤더와 엔드포인트 자유롭게 설정
+  3. 자동 감지: OpenRouter 같은 특정 서비스 자동 최적화
+  4. 표준 호환: OpenAI API 형식을 기본으로 사용하여 대부분의 API와 호환
+
+  Custom 모델은 사용자가 원하는 대로 설정할 수 있는 가장 유연한 옵션으로, 기본적으로 OpenAI API 호환 형식을 사용하면서도 사용자 정의 헤더와 엔드포인트를 통해 다양한 LLM 서비스와 통합할 수 있습니다.

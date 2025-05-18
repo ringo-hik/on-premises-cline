@@ -20,10 +20,10 @@ export class AllCustomHandler implements ApiHandler {
 		}
 	}
 
-	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+	async *createMessage(systemPrompt: string, messageInput: Anthropic.Messages.MessageParam[]): ApiStream {
 		const model = this.getModel()
 		const headers = this.buildHeaders()
-		const body = this.buildRequestBody(messages, systemPrompt, model.id)
+		const body = this.buildRequestBody(messageInput, systemPrompt, model.id)
 
 		const response = await fetch(this.endpoint, {
 			method: "POST",
@@ -35,7 +35,7 @@ export class AllCustomHandler implements ApiHandler {
 			throw new Error(`Custom API error: ${response.status} ${response.statusText}`)
 		}
 
-		yield* this.handleStreamResponse(response)
+		yield* this.handleStreamResponse(response, messageInput, systemPrompt)
 	}
 
 	private buildHeaders(): Record<string, string> {
@@ -82,7 +82,7 @@ export class AllCustomHandler implements ApiHandler {
 		}
 	}
 
-	private async *handleStreamResponse(response: Response): ApiStream {
+	private async *handleStreamResponse(response: Response, messagesInput: Anthropic.Messages.MessageParam[], systemPromptInput: string): ApiStream {
 		const reader = response.body?.getReader()
 		const decoder = new TextDecoder()
 
@@ -122,10 +122,10 @@ export class AllCustomHandler implements ApiHandler {
 		}
 
 		// 토큰 사용량 추정
-		const totalLength = messages.reduce((acc, msg) => {
+		const totalLength = messagesInput.reduce((acc: number, msg: any) => {
 			const content = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content)
 			return acc + content.length
-		}, systemPrompt.length)
+		}, systemPromptInput?.length || 0)
 
 		yield {
 			type: "usage",

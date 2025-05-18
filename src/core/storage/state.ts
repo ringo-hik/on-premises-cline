@@ -162,6 +162,17 @@ export async function getAllExtensionState(context: vscode.ExtensionContext) {
 		shellIntegrationTimeout,
 		enableCheckpointsSettingRaw,
 		mcpMarketplaceEnabledRaw,
+		napoliApiKey,
+		napoliBaseUrl,
+		napoliModelId,
+		napoliModelInfo,
+		dortmundApiKey,
+		dortmundBaseUrl,
+		dortmundModelId,
+		dortmundUserId,
+		dortmundUserType,
+		dortmundSystemName,
+		dortmundModelInfo,
 	] = await Promise.all([
 		getGlobalState(context, "isNewUser") as Promise<boolean | undefined>,
 		getGlobalState(context, "apiProvider") as Promise<ApiProvider | undefined>,
@@ -249,7 +260,22 @@ export async function getAllExtensionState(context: vscode.ExtensionContext) {
 		getGlobalState(context, "shellIntegrationTimeout") as Promise<number | undefined>,
 		getGlobalState(context, "enableCheckpointsSetting") as Promise<boolean | undefined>,
 		getGlobalState(context, "mcpMarketplaceEnabled") as Promise<boolean | undefined>,
-		fetch,
+		getSecret(context, "napoliApiKey") as Promise<string | undefined>,
+		getGlobalState(context, "napoliBaseUrl") as Promise<string | undefined>,
+		getGlobalState(context, "napoliModelId") as Promise<string | undefined>,
+		getGlobalState(context, "napoliModelInfo") as Promise<ModelInfo | undefined>,
+		getSecret(context, "dortmundApiKey") as Promise<string | undefined>,
+		getGlobalState(context, "dortmundBaseUrl") as Promise<string | undefined>,
+		getGlobalState(context, "dortmundModelId") as Promise<string | undefined>,
+		getGlobalState(context, "dortmundUserId") as Promise<string | undefined>,
+		getGlobalState(context, "dortmundUserType") as Promise<string | undefined>,
+		getGlobalState(context, "dortmundSystemName") as Promise<string | undefined>,
+		getGlobalState(context, "dortmundModelInfo") as Promise<ModelInfo | undefined>,
+		getSecret(context, "allCustomApiKey") as Promise<string | undefined>,
+		getGlobalState(context, "allCustomEndpoint") as Promise<string | undefined>,
+		getGlobalState(context, "allCustomModelId") as Promise<string | undefined>,
+		getGlobalState(context, "allCustomHeaders") as Promise<Record<string, string> | undefined>,
+		getGlobalState(context, "allCustomModelInfo") as Promise<ModelInfo | undefined>,
 	])
 
 	let apiProvider: ApiProvider
@@ -356,6 +382,8 @@ export async function getAllExtensionState(context: vscode.ExtensionContext) {
 			sambanovaApiKey,
 			favoritedModelIds,
 			requestTimeoutMs,
+			napoliApiKey,
+			dortmundApiKey,
 		},
 		isNewUser: isNewUser ?? true,
 		lastShownAnnouncementId,
@@ -379,7 +407,7 @@ export async function getAllExtensionState(context: vscode.ExtensionContext) {
 		previousModeAwsBedrockCustomSelected,
 		previousModeAwsBedrockCustomModelBaseId,
 		mcpMarketplaceEnabled: mcpMarketplaceEnabled,
-		telemetrySetting: "disabled", // Always disabled for on-premises
+		telemetrySetting: "disabled" as TelemetrySetting, // Always disabled for on-premises
 		planActSeparateModelsSetting,
 		enableCheckpointsSetting: enableCheckpointsSetting,
 		shellIntegrationTimeout: shellIntegrationTimeout || 4000,
@@ -447,6 +475,11 @@ export async function updateApiConfiguration(context: vscode.ExtensionContext, a
 		clineApiKey,
 		sambanovaApiKey,
 		favoritedModelIds,
+		allCustomApiKey,
+		allCustomEndpoint,
+		allCustomModelId,
+		allCustomHeaders,
+		allCustomModelInfo,
 	} = apiConfiguration
 	await updateGlobalState(context, "apiProvider", apiProvider)
 	await updateGlobalState(context, "apiModelId", apiModelId)
@@ -506,8 +539,32 @@ export async function updateApiConfiguration(context: vscode.ExtensionContext, a
 	await updateGlobalState(context, "reasoningEffort", reasoningEffort)
 	await storeSecret(context, "clineApiKey", clineApiKey)
 	await storeSecret(context, "sambanovaApiKey", sambanovaApiKey)
+	await storeSecret(context, "napoliApiKey", apiConfiguration.napoliApiKey)
+	await storeSecret(context, "dortmundApiKey", apiConfiguration.dortmundApiKey)
 	await updateGlobalState(context, "favoritedModelIds", favoritedModelIds)
 	await updateGlobalState(context, "requestTimeoutMs", apiConfiguration.requestTimeoutMs)
+	
+	// All-Custom provider settings
+	await storeSecret(context, "allCustomApiKey", apiConfiguration.allCustomApiKey)
+	await updateGlobalState(context, "allCustomEndpoint", apiConfiguration.allCustomEndpoint)
+	await updateGlobalState(context, "allCustomModelId", apiConfiguration.allCustomModelId)
+	await updateGlobalState(context, "allCustomHeaders", apiConfiguration.allCustomHeaders)
+	await updateGlobalState(context, "allCustomModelInfo", apiConfiguration.allCustomModelInfo)
+	
+	// Napoli provider settings
+	await storeSecret(context, "napoliApiKey", apiConfiguration.napoliApiKey)
+	await updateGlobalState(context, "napoliBaseUrl", apiConfiguration.napoliBaseUrl)
+	await updateGlobalState(context, "napoliModelId", apiConfiguration.napoliModelId)
+	await updateGlobalState(context, "napoliModelInfo", apiConfiguration.napoliModelInfo)
+	
+	// Dortmund provider settings
+	await storeSecret(context, "dortmundApiKey", apiConfiguration.dortmundApiKey)
+	await updateGlobalState(context, "dortmundBaseUrl", apiConfiguration.dortmundBaseUrl)
+	await updateGlobalState(context, "dortmundModelId", apiConfiguration.dortmundModelId)
+	await updateGlobalState(context, "dortmundUserId", apiConfiguration.dortmundUserId)
+	await updateGlobalState(context, "dortmundUserType", apiConfiguration.dortmundUserType)
+	await updateGlobalState(context, "dortmundSystemName", apiConfiguration.dortmundSystemName)
+	await updateGlobalState(context, "dortmundModelInfo", apiConfiguration.dortmundModelInfo)
 }
 
 export async function resetExtensionState(context: vscode.ExtensionContext) {
@@ -535,6 +592,9 @@ export async function resetExtensionState(context: vscode.ExtensionContext) {
 		"asksageApiKey",
 		"xaiApiKey",
 		"sambanovaApiKey",
+		"napoliApiKey",
+		"dortmundApiKey",
+		"allCustomApiKey",
 	]
 	for (const key of secretKeys) {
 		await storeSecret(context, key, undefined)

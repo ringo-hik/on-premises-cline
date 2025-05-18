@@ -97,10 +97,12 @@ export interface ApiHandlerOptions {
 	allCustomEndpoint?: string
 	allCustomModelId?: string
 	allCustomHeaders?: Record<string, string>
+	allCustomModelInfo?: ModelInfo
 	// napoli
 	napoliApiKey?: string
 	napoliBaseUrl?: string
 	napoliModelId?: string
+	napoliModelInfo?: ModelInfo
 	// dortmund
 	dortmundApiKey?: string
 	dortmundUserId?: string
@@ -108,11 +110,16 @@ export interface ApiHandlerOptions {
 	dortmundBaseUrl?: string
 	dortmundModelId?: string
 	dortmundSystemName?: string
+	dortmundModelInfo?: ModelInfo
 }
 
 export type ApiConfiguration = ApiHandlerOptions & {
 	apiProvider?: ApiProvider
 	favoritedModelIds?: string[]
+	// Custom model info fields
+	allCustomModelInfo?: ModelInfo
+	napoliModelInfo?: ModelInfo
+	dortmundModelInfo?: ModelInfo
 }
 
 // Models

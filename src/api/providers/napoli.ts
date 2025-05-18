@@ -7,78 +7,46 @@ import { ApiStream } from "../transform/stream"
 
 export class NapoliHandler implements ApiHandler {
 	private options: ApiHandlerOptions
+	private apiKey: string
 	private baseUrl: string
 
 	constructor(options: ApiHandlerOptions) {
 		this.options = options
-		this.baseUrl = this.options.napoliBaseUrl || "https://napoli-service/v1"
+		this.apiKey = this.options.napoliApiKey || ""
+		this.baseUrl = this.options.napoliBaseUrl || "https://napoli-endpoint/v1/chat/completions"
+
+		if (!this.baseUrl) {
+			throw new Error("Base URL is required for Napoli provider")
+		}
 	}
 
-	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+	async *createMessage(systemPrompt: string, messageInput: Anthropic.Messages.MessageParam[]): ApiStream {
 		const model = this.getModel()
-		const headers = this.buildHeaders()
-		const body = this.buildRequestBody(messages, systemPrompt, model.id)
-
-		const response = await fetch(`${this.baseUrl}/chat/completions`, {
+		const requestOptions = {
 			method: "POST",
-			headers,
-			body: JSON.stringify(body),
-		})
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${this.apiKey}`,
+			},
+			body: JSON.stringify({
+				model: model.id,
+				messages: [{ role: "system", content: systemPrompt }, ...convertToOpenAiMessages(messageInput)],
+				temperature: 0,
+				max_tokens: 4096,
+				stream: true,
+			}),
+		}
+
+		const response = await fetch(`${this.baseUrl}`, requestOptions)
 
 		if (!response.ok) {
 			throw new Error(`Napoli API error: ${response.status} ${response.statusText}`)
 		}
 
-		yield* this.handleStreamResponse(response)
+		yield* this.handleStreamResponse(response, messageInput, systemPrompt)
 	}
 
-	private buildHeaders(): Record<string, string> {
-		return {
-			Authorization: `Bearer ${this.options.napoliApiKey || ""}`,
-			"Content-Type": "application/json",
-			Accept: "text/event-stream; charset=utf-8",
-		}
-	}
-
-	private buildRequestBody(messages: Anthropic.Messages.MessageParam[], systemPrompt: string, modelId: string) {
-		return {
-			model: modelId,
-			messages: this.formatMessages(messages, systemPrompt),
-			temperature: 0,
-			max_tokens: 4096,
-			stream: true,
-		}
-	}
-
-	private formatMessages(messages: Anthropic.Messages.MessageParam[], systemPrompt: string) {
-		const formattedMessages = [{ role: "system", content: systemPrompt }]
-
-		messages.forEach((msg) => {
-			formattedMessages.push({
-				role: msg.role,
-				content: this.extractTextContent(msg.content),
-			})
-		})
-
-		return formattedMessages
-	}
-
-	private extractTextContent(content: Anthropic.Messages.MessageParam["content"]): string {
-		if (typeof content === "string") {
-			return content
-		}
-
-		if (Array.isArray(content)) {
-			return content
-				.filter((item) => item.type === "text")
-				.map((item) => (item as any).text)
-				.join("\n")
-		}
-
-		return ""
-	}
-
-	private async *handleStreamResponse(response: Response): ApiStream {
+	private async *handleStreamResponse(response: Response, messagesInput: Anthropic.Messages.MessageParam[], systemPromptInput: string): ApiStream {
 		const reader = response.body?.getReader()
 		const decoder = new TextDecoder()
 
@@ -101,6 +69,7 @@ export class NapoliHandler implements ApiHandler {
 					try {
 						const parsed = JSON.parse(data)
 						const content = parsed.choices?.[0]?.delta?.content
+
 						if (content) {
 							yield {
 								type: "text",
@@ -115,10 +84,10 @@ export class NapoliHandler implements ApiHandler {
 		}
 
 		// 토큰 사용량 추정
-		const totalLength = messages.reduce((acc, msg) => {
-			const content = this.extractTextContent(msg.content)
+		const totalLength = messagesInput.reduce((acc: number, msg: any) => {
+			const content = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content)
 			return acc + content.length
-		}, systemPrompt.length)
+		}, systemPromptInput?.length || 0)
 
 		yield {
 			type: "usage",

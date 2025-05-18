@@ -137,5 +137,5 @@ export function mergeJson(
 }
 
 function getExtensionUri(): vscode.Uri {
-	return vscode.extensions.getExtension("saoudrizwan.claude-dev")!.extensionUri
+	return vscode.extensions.getExtension("khm.nyf.cline-for-on-premises")!.extensionUri
 }

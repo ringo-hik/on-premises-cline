@@ -2,96 +2,60 @@ import { Anthropic } from "@anthropic-ai/sdk"
 import { withRetry } from "../retry"
 import { ApiHandler } from "../"
 import { ApiHandlerOptions, ModelInfo, dortmundDefaultModelId, dortmundDefaultModelInfo, DortmundModelId } from "@shared/api"
+import { convertToOpenAiMessages } from "../transform/openai-format"
 import { ApiStream } from "../transform/stream"
 
 export class DortmundHandler implements ApiHandler {
 	private options: ApiHandlerOptions
-	private baseUrl: string
+	private apiKey: string
 	private userId: string
 	private userType: string
+	private baseUrl: string
+	private systemName: string
 
 	constructor(options: ApiHandlerOptions) {
 		this.options = options
-		this.baseUrl = this.options.dortmundBaseUrl || "http://dortmund-service/v1"
+		this.apiKey = this.options.dortmundApiKey || ""
 		this.userId = this.options.dortmundUserId || ""
-		this.userType = this.options.dortmundUserType || ""
+		this.userType = this.options.dortmundUserType || "employee"
+		this.baseUrl = this.options.dortmundBaseUrl || "https://dortmund-endpoint/v1/message"
+		this.systemName = this.options.dortmundSystemName || "VSCODE"
+
+		if (!this.baseUrl) {
+			throw new Error("Base URL is required for Dortmund provider")
+		}
 	}
 
-	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+	async *createMessage(systemPrompt: string, messageInput: Anthropic.Messages.MessageParam[]): ApiStream {
 		const model = this.getModel()
-		const headers = this.buildHeaders()
-		const body = this.buildRequestBody(messages, systemPrompt, model.id)
-
-		const response = await fetch(`${this.baseUrl}/chat/completions`, {
+		const requestOptions = {
 			method: "POST",
-			headers,
-			body: JSON.stringify(body),
-		})
+			headers: {
+				"Content-Type": "application/json",
+				"x-api-key": this.apiKey,
+				"x-user-id": this.userId,
+				"x-user-type": this.userType,
+				"x-system-name": this.systemName,
+			},
+			body: JSON.stringify({
+				model: model.id,
+				messages: [{ role: "system", content: systemPrompt }, ...convertToOpenAiMessages(messageInput)],
+				temperature: 0,
+				max_tokens: 4096,
+				stream: true,
+			}),
+		}
+
+		const response = await fetch(`${this.baseUrl}`, requestOptions)
 
 		if (!response.ok) {
 			throw new Error(`Dortmund API error: ${response.status} ${response.statusText}`)
 		}
 
-		yield* this.handleStreamResponse(response)
+		yield* this.handleStreamResponse(response, messageInput, systemPrompt)
 	}
 
-	private buildHeaders(): Record<string, string> {
-		return {
-			"X-Dep-Ticket": this.options.dortmundApiKey || "",
-			"User-Id": this.userId,
-			"User-Type": this.userType,
-			"Send-System-Name": this.options.dortmundSystemName || "M",
-			"Prompt-Msg-Id": this.generateUUID(),
-			"Completion-Msg-Id": this.generateUUID(),
-			"Content-Type": "application/json",
-			Accept: "text/event-stream; charset=utf-8",
-		}
-	}
-
-	private buildRequestBody(messages: Anthropic.Messages.MessageParam[], systemPrompt: string, modelId: string) {
-		return {
-			model_id: modelId,
-			system_prompt: systemPrompt,
-			messages: this.formatMessages(messages),
-			user_id: this.userId,
-			user_type: this.userType,
-			temperature: 0,
-			max_tokens: 4096,
-			stream_mode: true,
-		}
-	}
-
-	private formatMessages(messages: Anthropic.Messages.MessageParam[]) {
-		return messages.map((msg) => ({
-			role: msg.role,
-			content: this.extractTextContent(msg.content),
-		}))
-	}
-
-	private extractTextContent(content: Anthropic.Messages.MessageParam["content"]): string {
-		if (typeof content === "string") {
-			return content
-		}
-
-		if (Array.isArray(content)) {
-			return content
-				.filter((item) => item.type === "text")
-				.map((item) => (item as any).text)
-				.join("\n")
-		}
-
-		return ""
-	}
-
-	private generateUUID(): string {
-		return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-			const r = (Math.random() * 16) | 0
-			const v = c === "x" ? r : (r & 0x3) | 0x8
-			return v.toString(16)
-		})
-	}
-
-	private async *handleStreamResponse(response: Response): ApiStream {
+	private async *handleStreamResponse(response: Response, messagesInput: Anthropic.Messages.MessageParam[], systemPromptInput: string): ApiStream {
 		const reader = response.body?.getReader()
 		const decoder = new TextDecoder()
 
@@ -113,8 +77,8 @@ export class DortmundHandler implements ApiHandler {
 
 					try {
 						const parsed = JSON.parse(data)
-						// Dortmund의 커스텀 응답 형식 처리
-						const content = parsed.choices?.[0]?.delta?.content || parsed.delta?.content
+						const content = parsed.choices?.[0]?.delta?.content || parsed.content
+
 						if (content) {
 							yield {
 								type: "text",
@@ -129,10 +93,10 @@ export class DortmundHandler implements ApiHandler {
 		}
 
 		// 토큰 사용량 추정
-		const totalLength = messages.reduce((acc, msg) => {
-			const content = this.extractTextContent(msg.content)
+		const totalLength = messagesInput.reduce((acc: number, msg: any) => {
+			const content = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content)
 			return acc + content.length
-		}, systemPrompt.length)
+		}, systemPromptInput?.length || 0)
 
 		yield {
 			type: "usage",

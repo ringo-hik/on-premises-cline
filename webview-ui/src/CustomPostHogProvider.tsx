@@ -1,36 +1,21 @@
-import { useEffect, type ReactNode } from "react"
+import { type ReactNode } from "react"
 import { PostHogProvider } from "posthog-js/react"
 import posthog from "posthog-js"
-import { posthogConfig } from "@shared/services/config/posthog-config"
-import { useExtensionState } from "./context/ExtensionStateContext"
+/* on-premises fallback - posthog disabled */
+
+// Create dummy posthog object for on-premises versions
+const dummyPosthog = {
+	init: () => {},
+	opt_in_capturing: () => {},
+	opt_out_capturing: () => {},
+	identify: () => {},
+	capture: () => {},
+	register: () => {},
+	isFeatureEnabled: () => false,
+	getFeatureFlag: () => null,
+} as unknown as typeof posthog
 
 export function CustomPostHogProvider({ children }: { children: ReactNode }) {
-	const { telemetrySetting, vscMachineId } = useExtensionState()
-	const isTelemetryEnabled = telemetrySetting !== "disabled"
-
-	useEffect(() => {
-		if (vscMachineId.length === 0) {
-			return
-		}
-
-		posthog.init(posthogConfig.apiKey, {
-			api_host: posthogConfig.host,
-			ui_host: posthogConfig.uiHost,
-			opt_out_capturing_by_default: true,
-			disable_session_recording: true,
-			capture_pageview: false,
-			capture_dead_clicks: true,
-			bootstrap: {
-				distinctID: vscMachineId,
-			},
-		})
-
-		if (isTelemetryEnabled) {
-			posthog.opt_in_capturing()
-		} else {
-			posthog.opt_out_capturing()
-		}
-	}, [isTelemetryEnabled, vscMachineId])
-
-	return <PostHogProvider client={posthog}>{children}</PostHogProvider>
+	// No initialization needed for on-premises version
+	return <PostHogProvider client={dummyPosthog}>{children}</PostHogProvider>
 }

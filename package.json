@@ -11,7 +11,7 @@
 		"name": "Cline Bot Inc."
 	},
 	"license": "Apache-2.0",
-	"publisher": "khm.nyf",
+	"publisher": "khm-nyf",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/cline/cline"

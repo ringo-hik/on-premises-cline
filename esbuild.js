@@ -5,6 +5,7 @@ const path = require("path")
 const production = process.argv.includes("--production")
 const watch = process.argv.includes("--watch")
 const standalone = process.argv.includes("--standalone")
+const forceNoCheck = process.argv.includes("--force-no-check")
 const destDir = standalone ? "dist-standalone" : "dist"
 
 /**
@@ -128,7 +129,8 @@ const baseConfig = {
 	define: {
 		"process.env.IS_DEV": JSON.stringify(!production),
 	},
-	tsconfig: path.resolve(__dirname, "tsconfig.json"),
+	// Skip TypeScript type checking if --force-no-check is specified
+	tsconfig: forceNoCheck ? undefined : path.resolve(__dirname, "tsconfig.json"),
 	plugins: [
 		copyWasmFiles,
 		aliasResolverPlugin,

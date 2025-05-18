@@ -32,6 +32,16 @@ const AccountView = ({ onDone }: AccountViewProps) => {
 }
 
 export const ClineAccountView = () => {
+	/* on-premises fallback - account login disabled */
+	return (
+		<div className="h-full flex flex-col justify-center items-center">
+			<div className="text-[var(--vscode-descriptionForeground)] text-center">
+				<p>Account login is not available in on-premises mode</p>
+			</div>
+		</div>
+	)
+	
+	// Original code disabled for on-premises
 	const { user: firebaseUser, handleSignOut } = useFirebaseAuth()
 	const { userInfo, apiConfiguration } = useExtensionState()
 

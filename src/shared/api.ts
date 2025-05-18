@@ -23,6 +23,9 @@ export type ApiProvider =
 	| "asksage"
 	| "xai"
 	| "sambanova"
+	| "all-custom"
+	| "napoli"
+	| "dortmund"
 
 export interface ApiHandlerOptions {
 	apiModelId?: string

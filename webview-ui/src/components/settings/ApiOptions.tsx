@@ -311,31 +311,7 @@ const ApiOptions = ({
 						minWidth: 130,
 						position: "relative",
 					}}>
-					<VSCodeOption value="cline">Cline</VSCodeOption>
-					<VSCodeOption value="openrouter">OpenRouter</VSCodeOption>
-					<VSCodeOption value="anthropic">Anthropic</VSCodeOption>
-					<VSCodeOption value="bedrock">Amazon Bedrock</VSCodeOption>
-					<VSCodeOption value="openai">Internal LLM</VSCodeOption>
-					<VSCodeOption value="vertex">GCP Vertex AI</VSCodeOption>
-					<VSCodeOption value="gemini">Google Gemini</VSCodeOption>
-					<VSCodeOption value="deepseek">DeepSeek</VSCodeOption>
-					<VSCodeOption value="mistral">Mistral</VSCodeOption>
-					<VSCodeOption value="openai-native">OpenAI</VSCodeOption>
-					<VSCodeOption value="vscode-lm">VS Code LM API</VSCodeOption>
-					<VSCodeOption value="requesty">Requesty</VSCodeOption>
-					<VSCodeOption value="fireworks">Fireworks</VSCodeOption>
-					<VSCodeOption value="together">Together</VSCodeOption>
-					<VSCodeOption value="qwen">Alibaba Qwen</VSCodeOption>
-					<VSCodeOption value="doubao">Bytedance Doubao</VSCodeOption>
-					<VSCodeOption value="lmstudio">LM Studio</VSCodeOption>
-					<VSCodeOption value="ollama">Ollama</VSCodeOption>
-					<VSCodeOption value="litellm">LiteLLM</VSCodeOption>
-					<VSCodeOption value="asksage">AskSage</VSCodeOption>
-					<VSCodeOption value="xai">xAI</VSCodeOption>
-					<VSCodeOption value="sambanova">SambaNova</VSCodeOption>
-					<VSCodeOption value="all-custom">All-Custom</VSCodeOption>
-					<VSCodeOption value="napoli">Napoli</VSCodeOption>
-					<VSCodeOption value="dortmund">Dortmund</VSCodeOption>
+					<VSCodeOption value="openai">Internal LLM (OpenAI Compatible)</VSCodeOption>
 				</VSCodeDropdown>
 			</DropdownContainer>
 

@@ -51,25 +51,27 @@
 
 ## 🚀 주요 특징
 
-### 🔐 세 가지 내부 LLM Provider
+### 🔐 세 가지 내부 LLM Provider (준비중)
 
-#### 1. All-Custom Provider
-- **완전한 커스터마이제이션**: 모든 종류의 내부 API와 호환
-- **동적 헤더 관리**: Add Header 버튼으로 실시간 헤더 추가/삭제
-- **다양한 응답 형식**: JSON, SSE, 텍스트 등 모든 형식 지원
-- **자동 서비스 인식**: OpenRouter, 내부 API 등 자동 감지
+> ⚠️ **주의사항**: 현재 글로벌 스토리지 저장 문제로 VS Code를 껐다키면 설정이 초기화되는 이슈가 있어 보류 중입니다. 현재는 Internal LLM (OpenAI Compatible) 방식을 이용해 주세요.
 
-#### 2. Napoli Provider
-- **OpenAI 호환**: 기존 OpenAI 호환 API와 완벽 호환
-- **Bearer 토큰 인증**: 간단하고 안전한 인증 방식
-- **스트리밍 지원**: 실시간 응답 스트리밍
-- **표준 메시지 형식**: OpenAI 표준 메시지 형식 사용
+#### 1. ~~All-Custom Provider~~
+- ~~**완전한 커스터마이제이션**: 모든 종류의 내부 API와 호환~~
+- ~~**동적 헤더 관리**: Add Header 버튼으로 실시간 헤더 추가/삭제~~
+- ~~**다양한 응답 형식**: JSON, SSE, 텍스트 등 모든 형식 지원~~
+- ~~**자동 서비스 인식**: OpenRouter, 내부 API 등 자동 감지~~
 
-#### 3. Dortmund Provider
-- **엔터프라이즈 보안**: X-Dep-Ticket, User-Id, User-Type 다단계 인증
-- **메시지 추적**: UUID 기반 각 메시지 추적
-- **커스텀 요청 형식**: system_prompt, model_id 등 특화된 구조
-- **감사 로그 지원**: 기업 컴플라이언스 요구사항 충족
+#### 2. ~~Napoli Provider~~
+- ~~**OpenAI 호환**: 기존 OpenAI 호환 API와 완벽 호환~~
+- ~~**Bearer 토큰 인증**: 간단하고 안전한 인증 방식~~
+- ~~**스트리밍 지원**: 실시간 응답 스트리밍~~
+- ~~**표준 메시지 형식**: OpenAI 표준 메시지 형식 사용~~
+
+#### 3. ~~Dortmund Provider~~
+- ~~**엔터프라이즈 보안**: X-Dep-Ticket, User-Id, User-Type 다단계 인증~~
+- ~~**메시지 추적**: UUID 기반 각 메시지 추적~~
+- ~~**커스텀 요청 형식**: system_prompt, model_id 등 특화된 구조~~
+- ~~**감사 로그 지원**: 기업 컴플라이언스 요구사항 충족~~
 
 ### 🛡️ Air-Gap 환경을 위한 완전한 최적화
 
@@ -96,44 +98,60 @@ code --install-extension cline-on-premises-3.16.1.vsix
 
 ## ⚙️ 설정 방법
 
-### All-Custom Provider 설정
+> ⚠️ **주의사항**: 현재는 Internal LLM (OpenAI Compatible) 방식만 안정적으로 지원됩니다.
+
+### Internal LLM 설정 (OpenAI Compatible)
 
 1. **기본 설정**
    ```
-   Settings → Cline → API Provider → All-Custom 선택
+   Settings → Cline → API Provider → OpenAI 선택
    ```
 
 2. **엔드포인트 설정**
    ```
+   Base URL: https://your-internal-llm.company.com/v1
+   API Key: your-internal-api-key
+   Model: gpt-4 (또는 내부 모델명)
+   ```
+
+### ~~All-Custom Provider 설정~~ (준비중)
+
+1. ~~**기본 설정**~~
+   ```
+   Settings → Cline → API Provider → All-Custom 선택
+   ```
+
+2. ~~**엔드포인트 설정**~~
+   ```
    Endpoint URL: https://your-internal-llm.company.com/v1/chat/completions
    ```
 
-3. **헤더 추가**
-   - "Add Header" 버튼 클릭
-   - Key: `X-Department`, Value: `Engineering`
-   - 필요한 만큼 헤더 추가 가능
+3. ~~**헤더 추가**~~
+   - ~~"Add Header" 버튼 클릭~~
+   - ~~Key: `X-Department`, Value: `Engineering`~~
+   - ~~필요한 만큼 헤더 추가 가능~~
 
-### Napoli Provider 설정
+### ~~Napoli Provider 설정~~ (준비중)
 
-1. **기본 설정**
+1. ~~**기본 설정**~~
    ```
    Settings → Cline → API Provider → Napoli 선택
    ```
 
-2. **연결 정보**
+2. ~~**연결 정보**~~
    ```
    Base URL: https://napoli.internal.company.com/v1
    Bearer Token: your-napoli-access-token
    ```
 
-### Dortmund Provider 설정
+### ~~Dortmund Provider 설정~~ (준비중)
 
-1. **기본 설정**
+1. ~~**기본 설정**~~
    ```
    Settings → Cline → API Provider → Dortmund 선택
    ```
 
-2. **인증 정보**
+2. ~~**인증 정보**~~
    ```
    Base URL: http://dortmund.internal.company.com/v1
    X-Dep-Ticket: your-department-ticket
@@ -204,8 +222,8 @@ code --install-extension cline-on-premises-3.16.1.vsix
 ## 📊 업데이트 기록
 
 ### v3.16.1-onpremises.1
-- All-Custom, Napoli, Dortmund Provider 구현
-- Add Header 버튼 방식으로 동적 헤더 관리
+- Internal LLM (OpenAI Compatible) 방식 지원
+- All-Custom, Napoli, Dortmund Provider 개발 (글로벌 스토리지 저장 문제로 실제 적용 보류 중)
 - 외부 서비스 연결 완전 차단
 - PostHog 텔레메트리 비활성화
 - Cline 계정 로그인 UI 제거

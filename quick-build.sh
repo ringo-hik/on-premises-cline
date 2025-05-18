@@ -1,22 +1,15 @@
 #!/bin/bash
-# Quick build script for on-premises Cline without type checking
+set -e
 
-cd /home/hik90/sol/cline_origin
-
-# Build the webview UI first
+# Step 1: Build the webview UI first
 cd webview-ui
-npx --no vite build
-
-# Now build the extension without type checks
+npm run build
 cd ..
+
+# Step 2: Build the extension skipping type checking
 node esbuild.js --force-no-check
 
-# Set proper path for assets
-echo "Fixing asset paths..."
+# Step 3: Package as a VS Code extension
+vsce package --no-dependencies
 
-# Create the extension package
-cd dist
-mkdir -p webview-ui/build
-cp -r ../webview-ui/build/* webview-ui/build/
-
-echo "Quick build completed!"
+echo "Build completed successfully!"

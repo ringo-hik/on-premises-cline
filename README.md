@@ -1,8 +1,6 @@
-<div align="center"><sub>
-English | <a href="https://github.com/cline/cline/blob/main/locales/es/README.md" target="_blank">Español</a> | <a href="https://github.com/cline/cline/blob/main/locales/de/README.md" target="_blank">Deutsch</a> | <a href="https://github.com/cline/cline/blob/main/locales/ja/README.md" target="_blank">日本語</a> | <a href="https://github.com/cline/cline/blob/main/locales/zh-cn/README.md" target="_blank">简体中文</a> | <a href="https://github.com/cline/cline/blob/main/locales/zh-tw/README.md" target="_blank">繁體中文</a> | <a href="https://github.com/cline/cline/blob/main/locales/ko/README.md" target="_blank">한국어</a>
-</sub></div>
+# Cline - On-Premises Version
 
-# Cline – \#1 on OpenRouter
+> 내부 네트워크 환경을 위한 Cline의 온프레미스 버전입니다. All-Custom, Napoli, Dortmund LLM provider를 지원합니다.
 
 <p align="center">
   <img src="https://media.githubusercontent.com/media/cline/cline/main/assets/docs/demo.gif" width="100%" />
@@ -12,10 +10,10 @@ English | <a href="https://github.com/cline/cline/blob/main/locales/es/README.md
 <table>
 <tbody>
 <td align="center">
-<a href="https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev" target="_blank"><strong>Download on VS Marketplace</strong></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=khm.cline-on-premises" target="_blank"><strong>VS Marketplace에서 다운로드</strong></a>
 </td>
 <td align="center">
-<a href="https://discord.gg/cline" target="_blank"><strong>Discord</strong></a>
+<a href="https://github.com/cline/cline" target="_blank"><strong>원본 Cline GitHub</strong></a>
 </td>
 <td align="center">
 <a href="https://www.reddit.com/r/cline/" target="_blank"><strong>r/cline</strong></a>
@@ -49,11 +47,28 @@ Thanks to [Claude 3.7 Sonnet's agentic coding capabilities](https://www.anthrop
 
 <img align="right" width="340" src="https://github.com/user-attachments/assets/3cf21e04-7ce9-4d22-a7b9-ba2c595e88a4">
 
-### Use any API and Model
+### 지원하는 내부 LLM Provider
 
-Cline supports API providers like OpenRouter, Anthropic, OpenAI, Google Gemini, AWS Bedrock, Azure, and GCP Vertex. You can also configure any OpenAI compatible API, or use a local model through LM Studio/Ollama. If you're using OpenRouter, the extension fetches their latest model list, allowing you to use the newest models as soon as they're available.
+이 On-Premises 버전은 내부 네트워크 환경에서 사용할 수 있는 세 가지 LLM provider를 지원합니다:
 
-The extension also keeps track of total tokens and API usage cost for the entire task loop and individual requests, keeping you informed of spend every step of the way.
+#### 1. All-Custom Provider
+- 완전히 커스터마이즈 가능한 provider
+- 동적 헤더 추가 기능 (Add Header 버튼)
+- 다양한 응답 형식 지원
+
+#### 2. Napoli Provider  
+- OpenAI 호환 API 형식
+- Bearer 토큰 인증
+- 표준 OpenAI 메시지 형식 사용
+
+#### 3. Dortmund Provider
+- 커스텀 인증 헤더 (X-Dep-Ticket, User-Id, User-Type)
+- 고유한 요청 형식 (system_prompt, model_id)
+- UUID 기반 메시지 추적
+
+### 기존 API 및 모델도 지원
+
+원본 Cline의 모든 API provider도 그대로 지원합니다: OpenRouter, Anthropic, OpenAI, Google Gemini, AWS Bedrock, Azure, GCP Vertex 등. 로컬 모델도 LM Studio/Ollama를 통해 사용 가능합니다.
 
 <!-- Transparent pixel to create line break after floating image -->
 

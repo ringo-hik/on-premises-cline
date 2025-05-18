@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.16.1-onpremises.1]
+
+-   Add three new LLM providers for on-premises environments:
+    - All-Custom Provider: Fully customizable with dynamic header configuration
+    - Napoli Provider: OpenAI-compatible internal LLM service with Bearer authentication
+    - Dortmund Provider: Custom internal LLM with X-Dep-Ticket authentication
+-   Implement Add Header button approach for All-Custom provider configuration
+-   Add comprehensive documentation for all on-premises providers
+-   Update UI components to support new provider configurations
+-   Maintain full compatibility with existing Cline features
+
 ## [3.16.1]
 
 -   Add Enable auto approve toggle switch, allowing users to easily turn auto-approve functionality on or off without losing their action settings

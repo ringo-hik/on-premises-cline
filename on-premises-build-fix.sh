@@ -84,7 +84,7 @@ cat > ./vsix-temp/extension.vsixmanifest << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vscode-manifest-schema/2011">
   <Metadata>
-    <Identity Language="en-US" Id="claude-dev" Version="3.16.1" Publisher="cline-onpremises"/>
+    <Identity Language="en-US" Id="cline-for-on-premises" Version="3.16.1-onpremises.1" Publisher="khm-nyf"/>
     <DisplayName>Cline (On-premises)</DisplayName>
     <Description>On-premises version of Cline</Description>
     <Categories>Other</Categories>

@@ -29,5 +29,11 @@
 		"titleBar.inactiveBackground": "#f9e64f99",
 		"titleBar.inactiveForeground": "#15202b99"
 	},
-	"peacock.remoteColor": "#f9e64f"
+	"peacock.remoteColor": "#f9e64f",
+	"security.workspace.trust.untrustedFiles": "open",
+	"security.workspace.trust.enabled": false,
+	"security.workspace.trust.startupPrompt": "never",
+	"extensions.experimental.webWorker": false,
+	"window.experimental.useSandbox": false,
+	"security.csp.disable": true
 }

@@ -224,7 +224,7 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
 				<link rel="stylesheet" type="text/css" href="${stylesUri}">
 				<link href="${codiconsUri}" rel="stylesheet" />
 				<link href="${katexCssUri}" rel="stylesheet" />
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource} data:; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https: data:; script-src 'nonce-${nonce}' 'unsafe-eval';">
+				<meta http-equiv="Content-Security-Policy" content="default-src 'self' ${webview.cspSource}; font-src 'self' ${webview.cspSource} data: *; style-src 'self' ${webview.cspSource} 'unsafe-inline' *; img-src 'self' ${webview.cspSource} https: data: *; script-src 'nonce-${nonce}' 'unsafe-eval';">
 				<title>Cline</title>
 			</head>
 			<body>
@@ -316,8 +316,8 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
 		`
 
 		const csp = [
-			"default-src 'none'",
-			`font-src ${webview.cspSource} data:`,
+			"default-src 'self' ${webview.cspSource}",
+			`font-src 'self' ${webview.cspSource} data: *`,
 			`style-src ${webview.cspSource} 'unsafe-inline' https://* http://${localServerUrl} http://0.0.0.0:${localPort}`,
 			`img-src ${webview.cspSource} https: data:`,
 			`script-src 'unsafe-eval' https://* http://${localServerUrl} http://0.0.0.0:${localPort} 'nonce-${nonce}'`,

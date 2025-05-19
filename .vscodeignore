@@ -35,8 +35,9 @@ docs/**
 On-premises-cline-docs/**
 
 # Fix issue where codicons don't get packaged (https://github.com/microsoft/vscode-extension-samples/issues/692)
-!node_modules/@vscode/codicons/dist/codicon.css
-!node_modules/@vscode/codicons/dist/codicon.ttf
+!node_modules/@vscode/**
+!node_modules/@vscode/codicons/**
+!node_modules/@vscode/codicons/dist/**
 
 # Include KaTeX CSS and fonts for LaTeX rendering
 !webview-ui/node_modules/katex/dist/katex.min.css

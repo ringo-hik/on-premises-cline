@@ -126,8 +126,10 @@ code --install-extension cline-internal-network.vsix
 
 ## 📊 업데이트 기록
 
-### v3.16.1-onpremises.1
+### v3.16.1-onpremises.1 (2024년 5월 19일)
+- 2024년 5월 18일 Cline 최신 버전 기준으로 마이그레이션
 - Internal LLM (OpenAI Compatible) 방식 지원
+- Provider 선택 드롭다운 메뉴 복원
 - 외부 서비스 연결 완전 차단
 - PostHog 텔레메트리 비활성화
 - Cline 계정 로그인 UI 제거

@@ -1,6 +1,6 @@
 # Cline On-Premises Edition
 
-> 내부 네트워크 환경을 위한 완전히 독립적인 AI 코딩 어시스턴트
+> On-premises version of Cline - 내부 네트워크 환경을 위한 독립적인 AI 코딩 어시스턴트
 
 ## 🔧 개발 접근 방식
 
@@ -22,15 +22,13 @@
 
 ### 🔐 내부 LLM Provider 지원
 
-현재는 Internal LLM (OpenAI Compatible) 방식만 안정적으로 지원됩니다.
+Internal LLM (OpenAI Compatible) 방식을 통해 내부망 모델과 연동합니다.
 
-### 🛡️ 온프레미스 환경을 위한 완전한 최적화
+### 🛡️ 온프레미스 환경 최적화
 
-- **외부 연결 완전 차단**: 모든 데이터가 내부 네트워크에서만 처리
-- **텔레메트리 완전 제거**: PostHog 등 모든 외부 분석 도구 코드 제거
-- **계정 기능 제거**: Cline 계정 로그인 UI 및 백엔드 연동 제거
-- **MCP 마켓플레이스 비활성화**: 외부 도구 다운로드 기능 차단
-- **Firebase 인증 제거**: 외부 인증 메커니즘 완전 제거
+- **내부망 전용**: 모든 데이터가 내부 네트워크에서만 처리
+- **외부 연결 없음**: 텔레메트리, 계정 기능, 마켓플레이스 등 모든 외부 연결 제거
+- **단독 실행**: 내부망에서 독립적으로 동작
 
 ## 📦 설치 가이드
 
@@ -48,8 +46,6 @@ code --install-extension cline-internal-network.vsix
 ```
 
 ## ⚙️ 설정 방법
-
-> ⚠️ **주의사항**: 현재는 Internal LLM (OpenAI Compatible) 방식만 안정적으로 지원됩니다.
 
 ### Internal LLM 설정 (OpenAI Compatible)
 
@@ -132,7 +128,6 @@ code --install-extension cline-internal-network.vsix
 
 ### v3.16.1-onpremises.1
 - Internal LLM (OpenAI Compatible) 방식 지원
-- All-Custom, Napoli, Dortmund Provider 개발 (글로벌 스토리지 저장 문제로 실제 적용 보류 중)
 - 외부 서비스 연결 완전 차단
 - PostHog 텔레메트리 비활성화
 - Cline 계정 로그인 UI 제거
@@ -201,52 +196,3 @@ code --install-extension cline-internal-network.vsix
 
 이러한 문제를 근본적으로 해결하기 위해 온프레미스 Cline 개발을 개인 프로젝트로 재시작했습니다. 모든 외부 의존성을 제거하고 순수하게 내부망에서만 작동하는 버전 개발을 목표로 설정했습니다.
 
-## 📋 지원 예정 기능
-
-다음 기능들은 현재 개발 중이거나 지원 예정인 기능들입니다:
-
-### 🔐 추가 내부 LLM Provider (개발 중)
-
-> ⚠️ **주의사항**: 현재 글로벌 스토리지 저장 문제로 VS Code를 껐다키면 설정이 초기화되는 이슈가 있어 보류 중입니다.
-
-#### 1. All-Custom Provider
-- **완전한 커스터마이제이션**: 모든 종류의 내부 API와 호환
-- **동적 헤더 관리**: Add Header 버튼으로 실시간 헤더 추가/삭제
-- **다양한 응답 형식**: JSON, SSE, 텍스트 등 모든 형식 지원
-- **자동 서비스 인식**: 내부 API 등 자동 감지
-
-#### 2. Napoli Provider
-- **OpenAI 호환**: 기존 OpenAI 호환 API와 완벽 호환
-- **Bearer 토큰 인증**: 간단하고 안전한 인증 방식
-- **스트리밍 지원**: 실시간 응답 스트리밍
-- **표준 메시지 형식**: OpenAI 표준 메시지 형식 사용
-
-#### 3. Dortmund Provider
-- **엔터프라이즈 보안**: X-Dep-Ticket, User-Id, User-Type 다단계 인증
-- **메시지 추적**: UUID 기반 각 메시지 추적
-- **커스텀 요청 형식**: system_prompt, model_id 등 특화된 구조
-- **감사 로그 지원**: 기업 컴플라이언스 요구사항 충족
-
-### 📝 Provider 설정 가이드 (준비 중)
-
-#### All-Custom Provider 설정
-```
-Settings → Cline → API Provider → All-Custom 선택
-Endpoint URL: https://your-internal-llm.company.com/v1
-```
-
-#### Napoli Provider 설정
-```
-Settings → Cline → API Provider → Napoli 선택
-Base URL: https://napoli.internal.company.com/v1
-Bearer Token: your-napoli-access-token
-```
-
-#### Dortmund Provider 설정
-```
-Settings → Cline → API Provider → Dortmund 선택
-Base URL: http://dortmund.internal.company.com/v1
-X-Dep-Ticket: your-department-ticket
-User-Id: your-employee-id
-User-Type: developer
-```

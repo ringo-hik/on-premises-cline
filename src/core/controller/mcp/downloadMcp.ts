@@ -12,6 +12,11 @@ import * as vscode from "vscode"
  */
 export async function downloadMcp(controller: Controller, request: StringRequest): Promise<Empty> {
 	try {
+		// On-premises mode: Do not allow MCP marketplace downloads
+		throw new Error("MCP Marketplace is not available in on-premises mode")
+
+		// Code below is disabled for on-premises version
+		/*
 		// Check if mcpId is provided
 		if (!request.value) {
 			throw new Error("MCP ID is required")
@@ -40,6 +45,7 @@ export async function downloadMcp(controller: Controller, request: StringRequest
 		if (!response.data) {
 			throw new Error("Invalid response from MCP marketplace API")
 		}
+		*/
 
 		console.log("[downloadMcp] Response from download API", { response })
 

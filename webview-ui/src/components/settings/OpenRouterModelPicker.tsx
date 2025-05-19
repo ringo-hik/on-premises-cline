@@ -85,9 +85,10 @@ const OpenRouterModelPicker: React.FC<OpenRouterModelPickerProps> = ({ isPopup }
 	}, [apiConfiguration])
 
 	useMount(() => {
-		ModelsServiceClient.refreshOpenRouterModels({}).catch((error: Error) =>
-			console.error("Failed to refresh OpenRouter models:", error),
-		)
+		// On-premises mode: OpenRouter API disabled
+		// ModelsServiceClient.refreshOpenRouterModels({}).catch((error: Error) =>
+		// 	console.error("Failed to refresh OpenRouter models:", error),
+		// )
 	})
 
 	useEffect(() => {

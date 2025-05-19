@@ -21,6 +21,10 @@ export async function refreshOpenRouterModels(
 
 	let models: Record<string, Partial<OpenRouterModelInfo>> = {}
 	try {
+		// On-premises mode: Do not attempt to fetch models from OpenRouter
+		throw new Error("OpenRouter API is not available in on-premises mode")
+
+		/* External API disabled in on-premises mode
 		const response = await axios.get("https://openrouter.ai/api/v1/models")
 
 		if (response.data?.data) {
@@ -117,6 +121,7 @@ export async function refreshOpenRouterModels(
 		}
 		await fs.writeFile(openRouterModelsFilePath, JSON.stringify(models))
 		console.log("OpenRouter models fetched and saved", models)
+		*/
 	} catch (error) {
 		console.error("Error fetching OpenRouter models:", error)
 

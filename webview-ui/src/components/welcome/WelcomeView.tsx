@@ -32,28 +32,15 @@ const WelcomeView = memo(() => {
 	return (
 		<div className="fixed inset-0 p-0 flex flex-col">
 			<div className="h-full px-5 overflow-auto">
-				<h2>Hi, I'm Cline</h2>
+				<h2>Hi, I'm Cline for on-premises</h2>
 				<div className="flex justify-center my-5">
 					<ClineLogoWhite className="size-16" />
 				</div>
 				<p>
-					I can do all kinds of tasks thanks to breakthroughs in{" "}
-					<VSCodeLink href="https://www.anthropic.com/claude/sonnet" className="inline">
-						Claude 4 Sonnet's
-					</VSCodeLink>
-					agentic coding capabilities and access to tools that let me create & edit files, explore complex projects, use
-					a browser, and execute terminal commands <i>(with your permission, of course)</i>. I can even use MCP to
-					create new tools and extend my own capabilities.
+					온프레미스 버전은 외부망 연결 코드를 우회한 버전입니다. 현재 Proxy에 의해 충분히 차단되고 있으나, Exception이
+					다수 발생하여 그냥 개선한 버전입니다. 일반 버전을 사용해도 문제는 없습니다. [NARRANS] OpenAI Compatible 옵션을
+					선택하고, 발급받은 API Key를 입력하시면 정상적으로 이용하실 수 있습니다.
 				</p>
-
-				<p className="text-[var(--vscode-descriptionForeground)]">
-					Sign up for an account to get started for free, or use an API key that provides access to models like Claude 4
-					Sonnet.
-				</p>
-
-				<VSCodeButton appearance="primary" onClick={handleLogin} className="w-full mt-1">
-					Get Started for Free
-				</VSCodeButton>
 
 				{!showApiOptions && (
 					<VSCodeButton

@@ -12,6 +12,17 @@ import * as vscode from "vscode"
  */
 export async function downloadMcp(controller: Controller, request: StringRequest): Promise<Empty> {
 	try {
+		// Check for offline mode
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			const errorMessage = "MCP marketplace is unavailable in offline mode"
+			vscode.window.showErrorMessage(errorMessage)
+			await controller.postMessageToWebview({
+				type: "mcpDownloadDetails",
+				error: errorMessage,
+			})
+			return Empty.create()
+		}
+
 		// Check if mcpId is provided
 		if (!request.value) {
 			throw new Error("MCP ID is required")

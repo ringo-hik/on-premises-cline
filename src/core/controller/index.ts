@@ -730,6 +730,19 @@ export class Controller {
 	// MCP Marketplace
 
 	private async fetchMcpMarketplaceFromApi(silent: boolean = false): Promise<McpMarketplaceCatalog | undefined> {
+		// Check for offline mode
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			if (!silent) {
+				const errorMessage = "MCP marketplace is unavailable in offline mode"
+				await this.postMessageToWebview({
+					type: "mcpMarketplaceCatalog",
+					error: errorMessage,
+				})
+				vscode.window.showErrorMessage(errorMessage)
+			}
+			return undefined
+		}
+
 		try {
 			const response = await axios.get("https://api.cline.bot/v1/mcp/marketplace", {
 				headers: {
@@ -768,6 +781,14 @@ export class Controller {
 	}
 
 	private async fetchMcpMarketplaceFromApiRPC(silent: boolean = false): Promise<McpMarketplaceCatalog | undefined> {
+		// Check for offline mode
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			if (!silent) {
+				throw new Error("MCP marketplace is unavailable in offline mode")
+			}
+			return undefined
+		}
+
 		try {
 			const response = await axios.get("https://api.cline.bot/v1/mcp/marketplace", {
 				headers: {

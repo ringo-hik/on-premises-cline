@@ -1,4 +1,4 @@
-import { PostHog } from "posthog-node"
+import { PostHog } from "../mock-posthog"
 import * as vscode from "vscode"
 import { version as extensionVersion } from "../../../../package.json"
 
@@ -112,10 +112,17 @@ class TelemetryService {
 
 	/**
 	 * Private constructor to enforce singleton pattern
-	 * Initializes PostHog client with configuration
+	 * Always creates a dummy client for offline mode
 	 */
 	private constructor() {
-		this.client = posthogClientProvider.getClient()
+		// Always use dummy client - no external connections
+		this.client = {
+			capture: () => {},
+			identify: () => {},
+			optIn: () => {},
+			optOut: () => {},
+			shutdown: async () => {},
+		} as any
 	}
 
 	private setDistinctId(installId: string) {
@@ -125,46 +132,12 @@ class TelemetryService {
 	}
 
 	/**
-	 * Updates the telemetry state based on user preferences and VSCode settings
-	 * Only enables telemetry if both VSCode global telemetry is enabled and user has opted in
+	 * Updates the telemetry state - always disabled in offline mode
 	 * @param didUserOptIn Whether the user has explicitly opted into telemetry
 	 */
 	public async updateTelemetryState(didUserOptIn: boolean): Promise<void> {
-		// First check global telemetry level - telemetry should only be enabled when level is "all"
-		const telemetryLevel = vscode.workspace.getConfiguration("telemetry").get<string>("telemetryLevel", "all")
-		const globalTelemetryEnabled = telemetryLevel === "all"
-
-		// We only enable telemetry if global vscode telemetry is enabled
-		if (globalTelemetryEnabled) {
-			this.telemetryEnabled = didUserOptIn
-		} else {
-			// Show warning to user that global telemetry is disabled
-			void vscode.window
-				.showWarningMessage(
-					"VSCode telemetry is disabled. To enable telemetry for this extension, first enable VSCode telemetry in settings.",
-					"Open Settings",
-				)
-				.then((selection) => {
-					if (selection === "Open Settings") {
-						void vscode.commands.executeCommand("workbench.action.openSettings", "telemetry.telemetryLevel")
-					}
-				})
-		}
-
-		// Update PostHog client state based on telemetry preference
-		if (this.telemetryEnabled) {
-			this.client.optIn()
-			this.client.identify({ distinctId: this.distinctId })
-		} else {
-			this.client.capture({
-				distinctId: this.distinctId,
-				event: TelemetryService.EVENTS.USER.OPT_OUT,
-				properties: this.addProperties({}),
-			})
-
-			await new Promise((resolve) => setTimeout(resolve, 1000)) // Delay 1 second before opting out
-			this.client.optOut()
-		}
+		// Always disabled in offline mode
+		this.telemetryEnabled = false
 	}
 
 	/**
@@ -187,39 +160,13 @@ class TelemetryService {
 	}
 
 	/**
-	 * Captures a telemetry event if telemetry is enabled or collects if collect=true
+	 * Captures a telemetry event - always disabled in offline mode
 	 * @param event The event to capture with its properties
 	 * @param collect If true, store the event in collectedEvents instead of sending to PostHog
 	 */
 	public capture(event: { event: string; properties?: any }, collect: boolean = false): void {
-		if (!this.telemetryEnabled) {
-			return
-		}
-		const taskId = event.properties.taskId
-
-		const propertiesWithVersion = this.addProperties(event.properties)
-
-		if (collect && taskId) {
-			const existingTask = this.collectedTasks.find((task) => task.taskId === taskId)
-			if (existingTask) {
-				existingTask.collection.push({
-					event: event.event,
-					properties: propertiesWithVersion,
-				})
-			} else {
-				this.collectedTasks.push({
-					taskId,
-					collection: [
-						{
-							event: event.event,
-							properties: propertiesWithVersion,
-						},
-					],
-				})
-			}
-		} else {
-			this.client.capture({ distinctId: this.distinctId, event: event.event, properties: propertiesWithVersion })
-		}
+		// Always return - no telemetry in offline mode
+		return
 	}
 
 	public captureExtensionActivated(installId: string) {
@@ -721,36 +668,8 @@ class TelemetryService {
 	}
 
 	public async sendCollectedEvents(taskId?: string): Promise<void> {
-		if (!this.telemetryEnabled) {
-			return
-		}
-
-		if (this.collectedTasks.length > 0) {
-			if (taskId) {
-				const task = this.collectedTasks.find((t) => t.taskId === taskId)
-				if (task) {
-					this.capture(
-						{
-							event: TelemetryService.EVENTS.TASK.TASK_COLLECTION,
-							properties: { taskId, events: task.collection },
-						},
-						false,
-					)
-					this.collectedTasks = this.collectedTasks.filter((t) => t.taskId !== taskId)
-				}
-			} else {
-				for (const task of this.collectedTasks) {
-					this.capture(
-						{
-							event: TelemetryService.EVENTS.TASK.TASK_COLLECTION,
-							properties: { taskId: task.taskId, events: task.collection },
-						},
-						false,
-					)
-					this.collectedTasks = this.collectedTasks.filter((t) => t.taskId !== task.taskId)
-				}
-			}
-		}
+		// Always disabled in offline mode
+		return
 	}
 
 	public async shutdown(): Promise<void> {

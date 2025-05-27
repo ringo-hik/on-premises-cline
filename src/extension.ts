@@ -8,12 +8,12 @@ import { createClineAPI } from "./exports"
 import "./utils/path" // necessary to have access to String.prototype.toPosix
 import { DIFF_VIEW_URI_SCHEME } from "./integrations/editor/DiffViewProvider"
 import assert from "node:assert"
-import { posthogClientProvider } from "./services/posthog/PostHogClientProvider"
+// PostHog import removed for on-premises deployment
 import { WebviewProvider } from "./core/webview"
 import { Controller } from "./core/controller"
 import { ErrorService } from "./services/error/ErrorService"
 import { initializeTestMode, cleanupTestMode } from "./services/test/TestMode"
-import { telemetryService } from "./services/posthog/telemetry/TelemetryService"
+// Telemetry import removed for on-premises deployment
 import { v4 as uuidv4 } from "uuid"
 
 /*
@@ -30,12 +30,18 @@ let outputChannel: vscode.OutputChannel
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
+	// Set default offline mode if not explicitly set
+	if (!process.env.CLINE_OFFLINE_MODE) {
+		process.env.CLINE_OFFLINE_MODE = "true"
+	}
+
 	outputChannel = vscode.window.createOutputChannel("Cline")
 	context.subscriptions.push(outputChannel)
 
 	ErrorService.initialize()
 	Logger.initialize(outputChannel)
 	Logger.log("Cline extension activated")
+	Logger.log(`CLINE_OFFLINE_MODE: ${process.env.CLINE_OFFLINE_MODE}`)
 
 	// Version checking for autoupdate notification
 	const currentVersion = context.extension.packageJSON.version
@@ -84,7 +90,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		await context.globalState.update("installId", installId)
 	}
 
-	telemetryService.captureExtensionActivated(installId)
+	// Telemetry disabled for on-premises deployment
+	// telemetryService.captureExtensionActivated(installId)
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand("cline.plusButtonClicked", async (webview: any) => {
@@ -321,7 +328,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				languageId,
 				Array.isArray(diagnostics) ? diagnostics : undefined,
 			)
-			telemetryService.captureButtonClick("codeAction_addToChat", visibleWebview?.controller.task?.taskId, true)
+			// Telemetry disabled for on-premises deployment
 		}),
 	)
 
@@ -493,7 +500,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			// Send to sidebar provider with diagnostics
 			const visibleWebview = WebviewProvider.getVisibleInstance()
 			await visibleWebview?.controller.fixWithCline(selectedText, filePath, languageId, diagnostics)
-			telemetryService.captureButtonClick("codeAction_fixWithCline", visibleWebview?.controller.task?.taskId, true)
+			// Telemetry disabled for on-premises deployment
 		}),
 	)
 
@@ -515,7 +522,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const fileMention = visibleWebview?.controller.getFileMentionFromPath(filePath) || filePath
 			const prompt = `Explain the following code from ${fileMention}:\n\`\`\`${editor.document.languageId}\n${selectedText}\n\`\`\``
 			await visibleWebview?.controller.initTask(prompt)
-			telemetryService.captureButtonClick("codeAction_explainCode", visibleWebview?.controller.task?.taskId, true)
+			// Telemetry disabled for on-premises deployment
 		}),
 	)
 
@@ -537,7 +544,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const fileMention = visibleWebview?.controller.getFileMentionFromPath(filePath) || filePath
 			const prompt = `Improve the following code from ${fileMention} (e.g., suggest refactorings, optimizations, or better practices):\n\`\`\`${editor.document.languageId}\n${selectedText}\n\`\`\``
 			await visibleWebview?.controller.initTask(prompt)
-			telemetryService.captureButtonClick("codeAction_improveCode", visibleWebview?.controller.task?.taskId, true)
+			// Telemetry disabled for on-premises deployment
 		}),
 	)
 
@@ -599,7 +606,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					"Could not activate Cline view. Please try opening it manually from the Activity Bar.",
 				)
 			}
-			telemetryService.captureButtonClick("command_focusChatInput", activeWebviewProvider?.controller.task?.taskId, true)
+			// Telemetry disabled for on-premises deployment
 		}),
 	)
 
@@ -636,11 +643,11 @@ const { IS_DEV, DEV_WORKSPACE_FOLDER } = process.env
 
 // This method is called when your extension is deactivated
 export async function deactivate() {
-	await telemetryService.sendCollectedEvents()
+	// Telemetry disabled for on-premises deployment
 
 	// Clean up test mode
 	cleanupTestMode()
-	await posthogClientProvider.shutdown()
+	// PostHog shutdown disabled for on-premises deployment
 	Logger.log("Cline extension deactivated")
 }
 

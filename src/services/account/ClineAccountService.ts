@@ -23,6 +23,11 @@ export class ClineAccountService {
 	 * @throws Error if the API key is not found or the request fails
 	 */
 	private async authenticatedRequest<T>(endpoint: string, config: AxiosRequestConfig = {}): Promise<T> {
+		// Check for offline mode
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			throw new Error("Account services are unavailable in offline mode")
+		}
+
 		const clineApiKey = await this.getClineApiKey()
 
 		if (!clineApiKey) {

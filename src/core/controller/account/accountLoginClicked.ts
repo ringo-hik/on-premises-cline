@@ -13,6 +13,14 @@ import { EmptyRequest, String } from "../../../shared/proto/common"
  * @returns The login URL as a string.
  */
 export async function accountLoginClicked(controller: Controller, unused: EmptyRequest): Promise<String> {
+	// Check for offline mode
+	if (process.env.CLINE_OFFLINE_MODE === "true") {
+		vscode.window.showInformationMessage("Account login is unavailable in offline mode")
+		return {
+			value: "",
+		}
+	}
+
 	// Generate nonce for state validation
 	const nonce = crypto.randomBytes(32).toString("hex")
 	await storeSecret(controller.context, "authNonce", nonce)

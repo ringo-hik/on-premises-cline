@@ -1,15 +1,13 @@
-import { PostHog } from "posthog-node"
-import { posthogConfig } from "@/shared/services/config/posthog-config"
+// PostHog imports removed for on-premises deployment
+import { PostHog } from "./mock-posthog"
 
 class PostHogClientProvider {
 	private static instance: PostHogClientProvider
-	private client: PostHog
+	private client: any
 
 	private constructor() {
-		this.client = new PostHog(posthogConfig.apiKey, {
-			host: posthogConfig.host,
-			enableExceptionAutocapture: false,
-		})
+		// Always create a mock client for on-premises deployment
+		this.client = new PostHog("dummy-key", {})
 	}
 
 	public static getInstance(): PostHogClientProvider {
@@ -19,7 +17,7 @@ class PostHogClientProvider {
 		return PostHogClientProvider.instance
 	}
 
-	public getClient(): PostHog {
+	public getClient(): any {
 		return this.client
 	}
 

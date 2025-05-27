@@ -277,6 +277,25 @@ const ApiOptions = ({
 		}
 	}, [])
 
+	// Set default values for OpenAI Compatible when provider is selected
+	useEffect(() => {
+		if (selectedProvider === "openai") {
+			const updates: any = {}
+			if (!apiConfiguration?.openAiBaseUrl) {
+				updates.openAiBaseUrl = "http://temporary-url.com"
+			}
+			if (!apiConfiguration?.openAiModelId) {
+				updates.openAiModelId = "temporary-model"
+			}
+			if (Object.keys(updates).length > 0) {
+				setApiConfiguration({
+					...apiConfiguration,
+					...updates,
+				})
+			}
+		}
+	}, [selectedProvider])
+
 	const debouncedRefreshOpenAiModels = useCallback((baseUrl?: string, apiKey?: string) => {
 		if (debounceTimerRef.current) {
 			clearTimeout(debounceTimerRef.current)
@@ -312,7 +331,7 @@ const ApiOptions = ({
 					<VSCodeOption value="openrouter">OpenRouter</VSCodeOption>
 					<VSCodeOption value="anthropic">Anthropic</VSCodeOption>
 					<VSCodeOption value="bedrock">Amazon Bedrock</VSCodeOption>
-					<VSCodeOption value="openai">OpenAI Compatible</VSCodeOption>
+					<VSCodeOption value="openai">[Narrans] OpenAI Compatible</VSCodeOption>
 					<VSCodeOption value="vertex">GCP Vertex AI</VSCodeOption>
 					<VSCodeOption value="gemini">Google Gemini</VSCodeOption>
 					<VSCodeOption value="deepseek">DeepSeek</VSCodeOption>
@@ -1038,11 +1057,11 @@ const ApiOptions = ({
 			{selectedProvider === "openai" && (
 				<div>
 					<VSCodeTextField
-						value={apiConfiguration?.openAiBaseUrl || ""}
+						value={apiConfiguration?.openAiBaseUrl || "http://temporary-url.com"}
 						style={{ width: "100%", marginBottom: 10 }}
 						type="url"
-						onInput={(e: any) => {
-							const baseUrl = e.target.value
+						onChange={(e: any) => {
+							const baseUrl = e.target.value || "http://temporary-url.com"
 							handleInputChange("openAiBaseUrl")({ target: { value: baseUrl } })
 
 							debouncedRefreshOpenAiModels(baseUrl, apiConfiguration?.openAiApiKey)
@@ -1064,9 +1083,12 @@ const ApiOptions = ({
 						<span style={{ fontWeight: 500 }}>API Key</span>
 					</VSCodeTextField>
 					<VSCodeTextField
-						value={apiConfiguration?.openAiModelId || ""}
+						value={apiConfiguration?.openAiModelId || "temporary-model"}
 						style={{ width: "100%", marginBottom: 10 }}
-						onInput={handleInputChange("openAiModelId")}
+						onChange={(e: any) => {
+							const modelId = e.target.value || "temporary-model"
+							handleInputChange("openAiModelId")({ target: { value: modelId } })
+						}}
 						placeholder={"Enter Model ID..."}>
 						<span style={{ fontWeight: 500 }}>Model ID</span>
 					</VSCodeTextField>

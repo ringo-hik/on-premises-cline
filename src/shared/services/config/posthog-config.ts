@@ -1,6 +1,7 @@
 // Public PostHog key (safe for open source)
+// OFFLINE MODE: PostHog is disabled for on-premises version
 export const posthogConfig = {
-	apiKey: "phc_qfOAGxZw2TL5O8p9KYd9ak3bPBFzfjC8fy5L6jNWY7K",
-	host: "https://data.cline.bot",
-	uiHost: "https://us.posthog.com",
+	apiKey: "dummy-key-for-offline-mode", // Dummy key to prevent initialization errors
+	host: "https://localhost", // Dummy host for on-premises
+	uiHost: "https://localhost", // Dummy UI host for on-premises
 }

@@ -27,12 +27,21 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 	const [user, setUser] = useState<User | null>(null)
 	const [isInitialized, setIsInitialized] = useState(false)
 
-	// Initialize Firebase
-	const app = initializeApp(firebaseConfig)
-	const auth = getAuth(app)
+	// Check for offline mode
+	const isOfflineMode = process.env.CLINE_OFFLINE_MODE === "true"
+
+	// Initialize Firebase only if not in offline mode
+	const app = !isOfflineMode ? initializeApp(firebaseConfig) : null
+	const auth = app ? getAuth(app) : null
 
 	// Handle auth state changes
 	useEffect(() => {
+		// Skip auth state handling in offline mode
+		if (isOfflineMode || !auth) {
+			setIsInitialized(true)
+			return
+		}
+
 		const unsubscribe = auth.onAuthStateChanged((user) => {
 			setUser(user)
 			setIsInitialized(true)
@@ -58,10 +67,16 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 		})
 
 		return () => unsubscribe()
-	}, [auth])
+	}, [auth, isOfflineMode])
 
 	const signInWithToken = useCallback(
 		async (token: string) => {
+			// Skip sign in if in offline mode
+			if (isOfflineMode || !auth) {
+				console.log("Offline mode: Skipping Firebase sign in")
+				return
+			}
+
 			try {
 				await signInWithCustomToken(auth, token)
 				console.log("Successfully signed in with custom token")
@@ -70,7 +85,7 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 				throw error
 			}
 		},
-		[auth],
+		[auth, isOfflineMode],
 	)
 
 	// Listen for auth callback from extension
@@ -87,6 +102,12 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 	}, [signInWithToken])
 
 	const handleSignOut = useCallback(async () => {
+		// Skip sign out if in offline mode
+		if (isOfflineMode || !auth) {
+			console.log("Offline mode: Skipping Firebase sign out")
+			return
+		}
+
 		try {
 			await signOut(auth)
 			console.log("Successfully signed out of Firebase")
@@ -94,7 +115,7 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 			console.error("Error signing out of Firebase:", error)
 			throw error
 		}
-	}, [auth])
+	}, [auth, isOfflineMode])
 
 	return (
 		<FirebaseAuthContext.Provider value={{ user, isInitialized, signInWithToken, handleSignOut }}>

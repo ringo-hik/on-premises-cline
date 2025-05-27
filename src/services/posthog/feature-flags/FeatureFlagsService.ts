@@ -1,4 +1,4 @@
-import { PostHog } from "posthog-node"
+import { PostHog } from "../mock-posthog"
 import { posthogClientProvider } from "../PostHogClientProvider"
 
 class FeatureFlagsService {
@@ -23,6 +23,11 @@ class FeatureFlagsService {
 	 * @returns Boolean indicating if the feature is enabled
 	 */
 	public async isFeatureFlagEnabled(flagName: string): Promise<boolean> {
+		// In offline mode, return false for all feature flags
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			return false
+		}
+
 		try {
 			const payload = await this.client.getFeatureFlagPayload(flagName, "_irrelevant_" /* optional params */)
 			if (payload && typeof payload === "object" && "enabled" in payload) {

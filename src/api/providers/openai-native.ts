@@ -38,6 +38,13 @@ export class OpenAiNativeHandler implements ApiHandler {
 
 	@withRetry()
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (OpenAI Native).",
+			};
+			return;
+		}
 		const model = this.getModel()
 
 		switch (model.id) {

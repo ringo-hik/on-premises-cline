@@ -19,6 +19,13 @@ export class XAIHandler implements ApiHandler {
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (XAI).",
+			};
+			return;
+		}
 		const modelId = this.getModel().id
 		// ensure reasoning effort is either "low" or "high" for grok-3-mini
 		let reasoningEffort: ChatCompletionReasoningEffort | undefined

@@ -17,6 +17,13 @@ export class OllamaHandler implements ApiHandler {
 
 	@withRetry({ retryAllErrors: true })
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (Ollama).",
+			};
+			return;
+		}
 		const ollamaMessages: Message[] = [{ role: "system", content: systemPrompt }, ...convertToOllamaMessages(messages)]
 
 		try {

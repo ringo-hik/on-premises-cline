@@ -18,6 +18,13 @@ export class LmStudioHandler implements ApiHandler {
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (LM Studio).",
+			};
+			return;
+		}
 		const openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
 			{ role: "system", content: systemPrompt },
 			...convertToOpenAiMessages(messages),

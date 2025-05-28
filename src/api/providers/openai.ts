@@ -39,6 +39,16 @@ export class OpenAiHandler implements ApiHandler {
 
 	@withRetry()
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			// TODO: Consider a more structured error or a localized message
+			// For now, yielding an error-like object in the stream
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode.",
+			};
+			return;
+		}
+
 		const modelId = this.options.openAiModelId ?? ""
 		const isDeepseekReasoner = modelId.includes("deepseek-reasoner")
 		const isR1FormatRequired = this.options.openAiModelInfo?.isR1FormatRequired ?? false

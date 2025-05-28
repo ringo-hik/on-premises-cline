@@ -21,6 +21,13 @@ export class TogetherHandler implements ApiHandler {
 
 	@withRetry()
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (Together AI).",
+			};
+			return;
+		}
 		const modelId = this.options.togetherModelId ?? ""
 		const isDeepseekReasoner = modelId.includes("deepseek-reasoner")
 

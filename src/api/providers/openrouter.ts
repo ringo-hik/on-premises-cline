@@ -28,6 +28,13 @@ export class OpenRouterHandler implements ApiHandler {
 
 	@withRetry()
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (OpenRouter).",
+			};
+			return;
+		}
 		this.lastGenerationId = undefined
 
 		const stream = await createOpenRouterStream(
@@ -97,6 +104,10 @@ export class OpenRouterHandler implements ApiHandler {
 	}
 
 	async getApiStreamUsage(): Promise<ApiStreamUsageChunk | undefined> {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			// In offline mode, we cannot fetch usage details from the external API
+			return undefined;
+		}
 		if (this.lastGenerationId) {
 			await setTimeoutPromise(500) // FIXME: necessary delay to ensure generation endpoint is ready
 			try {
@@ -122,6 +133,18 @@ export class OpenRouterHandler implements ApiHandler {
 
 	@withRetry({ maxRetries: 4, baseDelay: 250, maxDelay: 1000, retryAllErrors: true })
 	async *fetchGenerationDetails(genId: string) {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			// This function is called by getApiStreamUsage, which is already guarded.
+			// However, if this were to be called directly elsewhere, it should also be guarded.
+			// For now, relying on the guard in getApiStreamUsage.
+			// If direct calls are possible, an explicit guard here would be safer:
+			// throw new Error("External API calls are disabled in offline mode (OpenRouter fetchGenerationDetails).");
+			// Or yield an error if the context allows.
+			// Since this is an internal helper, and getApiStreamUsage is guarded, this might be okay.
+			// However, for defense in depth:
+			console.warn("OpenRouter fetchGenerationDetails called in offline mode, but should be guarded by caller.");
+			throw new Error("Attempted to fetch OpenRouter generation details in offline mode.");
+		}
 		// console.log("Fetching generation details for:", genId)
 		try {
 			const response = await axios.get(`https://openrouter.ai/api/v1/generation?id=${genId}`, {

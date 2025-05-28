@@ -27,6 +27,13 @@ export class CerebrasHandler implements ApiHandler {
 
 	@withRetry()
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (Cerebras).",
+			};
+			return;
+		}
 		// Convert Anthropic messages to Cerebras format
 		const cerebrasMessages: Array<{
 			role: "system" | "user" | "assistant"

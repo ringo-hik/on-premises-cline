@@ -137,6 +137,33 @@ For example, when working with a local web server, you can use 'Restore Workspac
 
 <img width="2000" height="0" src="https://github.com/user-attachments/assets/ee14e6f7-20b8-4391-9091-8e8e25561929"><br>
 
+## On-Premises Version
+
+This version of Cline (currently 3.17.7) is specifically adapted for deployment in on-premises environments that may have limited or no external internet connectivity. It ensures that Cline can operate effectively using internal resources and that sensitive data handling aligns with enterprise security policies.
+
+**Key Modifications & Behavior:**
+
+*   **External Connections Blocked (Offline Mode):**
+    *   When the environment variable `CLINE_OFFLINE_MODE` is set to `true` (e.g., `export CLINE_OFFLINE_MODE=true`), all designed external API calls made by Cline are blocked. This includes attempts to reach public model provider APIs, the external MCP (Model Context Protocol) marketplace, and other internet-based services.
+    *   This mode is designed to ensure Cline operates in a fully isolated manner if required. Users should configure Cline to point to internal API endpoints.
+
+*   **Telemetry Disabled:**
+    *   All telemetry and analytics gathering functionalities have been completely disabled. Cline uses a mock telemetry client in this version to ensure no data is transmitted externally.
+
+*   **MCP Marketplace:**
+    *   Access to the external MCP marketplace (for discovering and downloading new MCP servers from `api.cline.bot`) is disabled when `CLINE_OFFLINE_MODE=true`. Users can still install and use MCP servers from internal sources or pre-existing setups.
+
+*   **API Configuration for Internal Models:**
+    *   This version is optimized for use with internally hosted language models through an "OpenAI Compatible API" interface.
+    *   Users can configure the Base URL and Model ID for their internal OpenAI-compatible endpoints in Cline's settings.
+    *   API keys provided for such configurations are automatically handled as `Bearer` tokens in the Authorization header.
+
+*   **New API Providers in Offline Mode:**
+    *   While this version includes support for newer API providers (such as Qwen, Doubao, DeepSeek, Nebius, XAI), these will also respect the `CLINE_OFFLINE_MODE=true` setting, and their external calling capabilities will be blocked.
+
+**Installation Package:**
+*   The installation package for this on-premises version is named `on-premises-cline-VERSION.vsix` (e.g., `on-premises-cline-3.17.7.vsix`).
+
 ## Contributing
 
 To contribute to the project, start with our [Contributing Guide](CONTRIBUTING.md) to learn the basics. You can also join our [Discord](https://discord.gg/cline) to chat with other contributors in the `#contributors` channel. If you're looking for full-time work, check out our open positions on our [careers page](https://cline.bot/join-us)!

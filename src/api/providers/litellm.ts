@@ -18,6 +18,12 @@ export class LiteLlmHandler implements ApiHandler {
 	}
 
 	async calculateCost(prompt_tokens: number, completion_tokens: number): Promise<number | undefined> {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			// In offline mode, we cannot calculate cost via an external call.
+			// Return undefined or a predefined value (e.g., 0).
+			console.warn("LiteLLM cost calculation skipped in offline mode.");
+			return undefined; 
+		}
 		// Reference: https://github.com/BerriAI/litellm/blob/122ee634f434014267af104814022af1d9a0882f/litellm/proxy/spend_tracking/spend_management_endpoints.py#L1473
 		const modelId = this.options.liteLlmModelId || liteLlmDefaultModelId
 		try {
@@ -52,6 +58,13 @@ export class LiteLlmHandler implements ApiHandler {
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (LiteLLM).",
+			};
+			return;
+		}
 		const formattedMessages = convertToOpenAiMessages(messages)
 		const systemMessage: OpenAI.Chat.ChatCompletionSystemMessageParam = {
 			role: "system",

@@ -19,6 +19,13 @@ export class MistralHandler implements ApiHandler {
 
 	@withRetry()
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (Mistral AI).",
+			};
+			return;
+		}
 		const stream = await this.client.chat
 			.stream({
 				model: this.getModel().id,

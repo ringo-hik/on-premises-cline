@@ -26,6 +26,13 @@ export class ClineHandler implements ApiHandler {
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (Cline API).",
+			};
+			return;
+		}
 		this.lastGenerationId = undefined
 
 		const stream = await createOpenRouterStream(
@@ -95,6 +102,10 @@ export class ClineHandler implements ApiHandler {
 	}
 
 	async getApiStreamUsage(): Promise<ApiStreamUsageChunk | undefined> {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			// In offline mode, we cannot fetch usage details from the external API
+			return undefined;
+		}
 		if (this.lastGenerationId) {
 			try {
 				const response = await axios.get(`https://api.cline.bot/v1/generation?id=${this.lastGenerationId}`, {

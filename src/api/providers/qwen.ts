@@ -49,6 +49,13 @@ export class QwenHandler implements ApiHandler {
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (Qwen).",
+			};
+			return;
+		}
 		const model = this.getModel()
 		const isDeepseekReasoner = model.id.includes("deepseek-r1")
 		let openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [

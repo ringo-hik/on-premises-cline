@@ -46,6 +46,13 @@ export class AskSageHandler implements ApiHandler {
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (AskSage).",
+			};
+			return;
+		}
 		try {
 			const model = this.getModel()
 

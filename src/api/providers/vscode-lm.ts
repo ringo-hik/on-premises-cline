@@ -168,6 +168,11 @@ export class VsCodeLmHandler implements ApiHandler, SingleCompletionHandler {
 	 * const chatClient = await createClient(selector);
 	 */
 	async createClient(selector: vscode.LanguageModelChatSelector): Promise<vscode.LanguageModelChat> {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			throw new Error(
+				"Cline <Language Model API>: Cannot select chat models in offline mode as it may lead to external calls.",
+			);
+		}
 		try {
 			const models = await vscode.lm.selectChatModels(selector)
 
@@ -233,6 +238,10 @@ export class VsCodeLmHandler implements ApiHandler, SingleCompletionHandler {
 	}
 
 	private async countTokens(text: string | vscode.LanguageModelChatMessage): Promise<number> {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			console.warn("Cline <Language Model API>: Token counting skipped in offline mode.");
+			return 0; // Or an estimated value if that's more appropriate and feasible locally
+		}
 		// Check for required dependencies
 		if (!this.client) {
 			console.warn("Cline <Language Model API>: No client available for token counting")
@@ -319,6 +328,12 @@ export class VsCodeLmHandler implements ApiHandler, SingleCompletionHandler {
 	}
 
 	private async getClient(): Promise<vscode.LanguageModelChat> {
+		if (process.env.CLINE_OFFLINE_MODE === "true" && !this.client) {
+			// If offline and no client yet, prevent fetching one that might be external.
+			// If a client already exists (e.g. from a previous non-offline session),
+			// the individual method calls (createMessage, completePrompt) will be guarded.
+			throw new Error("Cline <Language Model API>: Cannot initialize a new client in offline mode.");
+		}
 		if (!this.client) {
 			console.debug("Cline <Language Model API>: Getting client with options:", {
 				vsCodeLmModelSelector: this.options.vsCodeLmModelSelector,
@@ -407,6 +422,15 @@ export class VsCodeLmHandler implements ApiHandler, SingleCompletionHandler {
 	}
 
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			// This check is crucial as getClient might already have a client instance
+			// from a previous non-offline state.
+			yield {
+				type: "error",
+				error: "External API calls via VSCode Language Model are disabled in offline mode.",
+			};
+			return;
+		}
 		// Ensure clean state before starting a new request
 		this.ensureCleanState()
 		const client: vscode.LanguageModelChat = await this.getClient()
@@ -611,6 +635,9 @@ export class VsCodeLmHandler implements ApiHandler, SingleCompletionHandler {
 	}
 
 	async completePrompt(prompt: string): Promise<string> {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			throw new Error("External API calls via VSCode Language Model are disabled in offline mode for completePrompt.");
+		}
 		try {
 			const client = await this.getClient()
 			const response = await client.sendRequest(

@@ -24,6 +24,13 @@ export class AwsBedrockHandler implements ApiHandler {
 
 	@withRetry()
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (AWS Bedrock).",
+			};
+			return;
+		}
 		// cross region inference requires prefixing the model id with the region
 		const modelId = await this.getModelId()
 		const model = this.getModel()

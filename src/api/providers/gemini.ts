@@ -79,6 +79,13 @@ export class GeminiHandler implements ApiHandler {
 		maxDelay: 15000,
 	})
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			yield {
+				type: "error",
+				error: "External API calls are disabled in offline mode (Gemini).",
+			};
+			return;
+		}
 		const { id: modelId, info } = this.getModel()
 		const contents = messages.map(convertAnthropicMessageToGemini)
 
@@ -303,6 +310,13 @@ export class GeminiHandler implements ApiHandler {
 	 * Count tokens in content using the Gemini API
 	 */
 	async countTokens(content: Array<any>): Promise<number> {
+		if (process.env.CLINE_OFFLINE_MODE === "true") {
+			// In offline mode, we cannot make an external call to count tokens.
+			// Return a fallback estimation or a predefined value (e.g., 0 or an estimation).
+			// For now, using the existing fallback estimation.
+			console.warn("Gemini token counting skipped in offline mode, using fallback estimation.");
+			return this.estimateTokens(content);
+		}
 		try {
 			const { id: model } = this.getModel()
 
